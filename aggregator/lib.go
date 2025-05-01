@@ -32,34 +32,35 @@ func NewAggregator(interval time.Duration) *Aggregator {
 }
 
 func (a *Aggregator) Start() {
-	ticker := time.NewTicker(a.interval)
-	defer ticker.Stop()
-	file, err := os.OpenFile("fck.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("aggregator.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		fmt.Println("Error opening file: ", err)
-		return
+		panic("Error opening file: " + err.Error())
 	}
+	defer file.Close()
+	for {
+		select {
+		case metric := <-a.MetricsChannel:
+			a.updateStats(metric)
+			a.TimeStamp = time.Now().Format(time.RFC3339)
 
-	go func() {
-		for {
-			select {
-			case metric := <-a.MetricsChannel:
-				a.updateStats(metric)
-			case <-ticker.C:
-				fmt.Println("Aggregated Stats:")
-				for _, met := range Metrics {
-					if stat, ok := a.Stats[met]; ok {
-						file.WriteString(fmt.Sprintf("Metric: %s, Max: %.2f, Min: %.2f, Avg: %.2f, Total: %d\n",
-							stat.Metric, stat.Max, stat.Min, stat.Avg, stat.Total))
-					} else {
-						fmt.Printf("Metric: %s, No data available\n", met)
-					}
+		case <-time.After(a.interval):
+			for _, met := range Metrics {
+				if stat, ok := a.Stats[met]; ok {
+					file.WriteString(fmt.Sprintf(
+						"[%s] %s: Max: %.2f, Min: %.2f, Avg: %.2f, Total: %d\n",
+						a.TimeStamp,
+						stat.Metric,
+						stat.Max,
+						stat.Min,
+						stat.Avg,
+						stat.Total,
+					))
 				}
-				a.Stats = make(map[string]AggregatorStats)
-
 			}
+			a.Stats = make(map[string]AggregatorStats)
+			a.TimeStamp = time.Now().Format(time.RFC3339)
 		}
-	}()
+	}
 }
 func (a *Aggregator) updateStats(metric logger.ContainerMetrics) {
 	for _, met := range Metrics {

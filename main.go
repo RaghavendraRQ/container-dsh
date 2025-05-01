@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"container-dsh/aggregator"
 	"container-dsh/logger"
 
 	cont "github.com/docker/docker/api/types/container"
@@ -27,6 +28,8 @@ func main() {
 		log.Fatalln("Error: ", err)
 	}
 	timeSeriesLogger := logger.TimeSeries{}
+	aggregator := aggregator.NewAggregator(3 * time.Second)
+	go aggregator.Start()
 	for _, container := range containers {
 
 		go func(id string) {
@@ -50,12 +53,20 @@ func main() {
 			timeSeriesLogger.Log(id[:10], "CPU", calculateCPUPercent(&statsData))
 			timeSeriesLogger.Log(id[:10], "Mem", float64(statsData.MemoryStats.Stats["Usage"])/(1024*1024))
 
+			if id[:10] == "eeb37b74c1" {
+				log.Println("Container ID: ", id)
+				aggregator.MetricsChannel <- logger.ContainerMetrics{
+					CpuUsage: 12,
+					MemUsage: float64(statsData.MemoryStats.Stats["Usage"]) / (1024 * 1024),
+				}
+			}
+
 		}(container.ID)
 
 	}
 
-	time.Sleep(3 * time.Second)
-	timeSeriesLogger.Flush("test.json")
+	time.Sleep(7 * time.Second)
+	timeSeriesLogger.Dump("test.json")
 }
 
 func calculateCPUPercent(stat *cont.StatsResponse) float64 {

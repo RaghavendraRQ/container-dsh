@@ -34,7 +34,7 @@ func (t *TimeSeries) Log(id, metric string, value float64) {
 	t.buffer = append(t.buffer, newMetric)
 }
 
-func (t *TimeSeries) Flush(filepath string) {
+func (t *TimeSeries) Dump(filepath string) {
 	t.filePath = filepath
 	file, err := os.OpenFile(t.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
