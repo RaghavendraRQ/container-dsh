@@ -1,7 +1,7 @@
 package main
 
 import (
-	"container-dsh/collector"
+	"container-dsh/pkg/collector"
 	"log"
 	"time"
 )

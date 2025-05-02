@@ -2,7 +2,6 @@ package logger
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -18,7 +17,7 @@ type MetricEntry struct {
 
 type TimeSeries struct {
 	mu             sync.Mutex
-	buffer         []MetricEntry
+	Buffer         []MetricEntry `json:"timeseries"`
 	filePath       string
 	Done           chan bool
 	MetricsChannel chan MetricEntry
@@ -34,10 +33,10 @@ func (t *TimeSeries) Start(filepath string) {
 
 		case metric := <-t.MetricsChannel:
 			t.mu.Lock()
-			t.buffer = append(t.buffer, metric)
-			if len(t.buffer) >= 100 {
+			t.Buffer = append(t.Buffer, metric)
+			if len(t.Buffer) >= 100 {
 				t.Dump()
-				t.buffer = nil
+				t.Buffer = nil
 			}
 			t.mu.Unlock()
 		default:
@@ -54,11 +53,15 @@ func (t *TimeSeries) Dump() {
 	}
 	defer file.Close()
 
-	encoder := json.NewEncoder(file)
-	for _, metric := range t.buffer {
-		if err := encoder.Encode(metric); err != nil {
-			fmt.Printf("Error while inserting log: %s", err)
-		}
+	if err := json.NewEncoder(file).Encode(t.Buffer); err != nil {
+		log.Println("Error while inserting log:", err)
+		return
 	}
-	t.buffer = nil
+	//encoder := json.NewEncoder(file)
+	//for _, metric := range t.Buffer {
+	//if err := encoder.Encode(metric); err != nil {
+	//fmt.Printf("Error while inserting log: %s", err)
+	//}
+	//}
+	t.Buffer = nil
 }

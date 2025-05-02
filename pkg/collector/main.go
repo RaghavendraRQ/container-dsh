@@ -1,7 +1,7 @@
 package collector
 
 import (
-	"container-dsh/logger"
+	"container-dsh/pkg/logger"
 	"context"
 	"encoding/json"
 	"fmt"
