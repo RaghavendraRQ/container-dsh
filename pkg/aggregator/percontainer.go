@@ -1,7 +1,7 @@
 package aggregator
 
 import (
-	"container-dsh/logger"
+	"container-dsh/pkg/logger"
 )
 
 type CombinedAggregator struct {
