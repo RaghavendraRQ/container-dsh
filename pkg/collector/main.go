@@ -114,10 +114,41 @@ func GetContainerData(cli *client.Client, containers []container.Summary) {
 				Metric:      "cpu_usage",
 				Value:       metrics.CPUUsage,
 			})
+
+			sendMetricsToLogger(id, metrics)
 			PrintPretty(id, metrics)
 
 			statsPool.Put(statsData)
 		}(cont.ID)
+	}
+}
+
+func sendMetricsToLogger(id string, metric Metrics) {
+	if timeLogger.MetricsChannel != nil {
+		timeLogger.MetricsChannel <- logger.MetricEntry{
+			TimeStamp:   time.Now(),
+			ContainerId: id,
+			Metric:      "cpu_usage",
+			Value:       metric.CPUUsage,
+		}
+		timeLogger.MetricsChannel <- logger.MetricEntry{
+			TimeStamp:   time.Now(),
+			ContainerId: id,
+			Metric:      "mem_usage",
+			Value:       metric.MemUsage,
+		}
+		timeLogger.MetricsChannel <- logger.MetricEntry{
+			TimeStamp:   time.Now(),
+			ContainerId: id,
+			Metric:      "net_io",
+			Value:       metric.NetIO,
+		}
+		timeLogger.MetricsChannel <- logger.MetricEntry{
+			TimeStamp:   time.Now(),
+			ContainerId: id,
+			Metric:      "disk_io",
+			Value:       metric.DiskIO,
+		}
 	}
 }
 
