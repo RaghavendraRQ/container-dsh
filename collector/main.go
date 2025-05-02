@@ -1,10 +1,13 @@
 package collector
 
 import (
+	"container-dsh/logger"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
+	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -17,22 +20,30 @@ type Metrics struct {
 	DiskIO   float64 `json:"disk_io"`
 }
 
+const (
+	TIMEFILE   string        = "time.json"
+	TIMELOGEND time.Duration = 1 * time.Second
+)
+
 var (
-	ctx       context.Context
-	statsPool sync.Pool
+	ctx        context.Context
+	statsPool  sync.Pool
+	timeLogger logger.TimeSeries
+	wg         sync.WaitGroup
+	buffer     []logger.MetricEntry
 )
 
 func init() {
 	// Initialize the collector
 	ctx = context.Background()
 	statsPool = sync.Pool{
-		New: func() interface{} {
+		New: func() any {
 			return &container.StatsResponse{}
 		},
 	}
 }
 
-func Start() error {
+func Start(haveTimeLogger bool) error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("error in creating client: %v", err)
@@ -42,8 +53,42 @@ func Start() error {
 	if err != nil {
 		return fmt.Errorf("error in getting containers: %v", err)
 	}
+	if haveTimeLogger {
+		wg.Add(1)
+		go startTimeLogger(&wg)
+	}
 	GetContainerData(cli, containers)
+	log.Printf("Before wait")
+	wg.Wait()
+	log.Printf("After wait")
 	return nil
+}
+
+func startTimeLogger(wg *sync.WaitGroup) {
+	timeLogger = logger.TimeSeries{
+		MetricsChannel: make(chan logger.MetricEntry),
+		Done:           make(chan bool),
+	}
+	go timeLogger.Start(TIMEFILE)
+	go func() {
+		defer wg.Done()
+		startTime := time.Now()
+		for {
+			timeLogger.MetricsChannel <- logger.MetricEntry{
+				TimeStamp:   time.Now(),
+				ContainerId: "0de5244ede",
+				Metric:      "cpu_usage",
+				Value:       0.0,
+			}
+
+			if time.Since(startTime) >= TIMELOGEND {
+				timeLogger.Done <- true
+				return
+			}
+
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
 }
 
 func GetContainerData(cli *client.Client, containers []container.Summary) {
@@ -56,7 +101,6 @@ func GetContainerData(cli *client.Client, containers []container.Summary) {
 				return
 			}
 			defer stats.Body.Close()
-
 			statsData := statsPool.Get().(*container.StatsResponse)
 			if err := json.NewDecoder(stats.Body).Decode(statsData); err != nil {
 				fmt.Println("Decode err: ", err)
@@ -64,6 +108,12 @@ func GetContainerData(cli *client.Client, containers []container.Summary) {
 			}
 
 			metrics := NewMetrics(statsData)
+			buffer = append(buffer, logger.MetricEntry{
+				TimeStamp:   time.Now(),
+				ContainerId: id,
+				Metric:      "cpu_usage",
+				Value:       metrics.CPUUsage,
+			})
 			PrintPretty(id, metrics)
 
 			statsPool.Put(statsData)

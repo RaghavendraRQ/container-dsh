@@ -17,25 +17,36 @@ type MetricEntry struct {
 }
 
 type TimeSeries struct {
-	mu       sync.Mutex
-	buffer   []MetricEntry
-	filePath string
+	mu             sync.Mutex
+	buffer         []MetricEntry
+	filePath       string
+	Done           chan bool
+	MetricsChannel chan MetricEntry
 }
 
-func (t *TimeSeries) Log(id, metric string, value float64) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	newMetric := MetricEntry{
-		TimeStamp:   time.Now(),
-		ContainerId: id,
-		Metric:      metric,
-		Value:       value,
-	}
-	t.buffer = append(t.buffer, newMetric)
-}
-
-func (t *TimeSeries) Dump(filepath string) {
+func (t *TimeSeries) Start(filepath string) {
 	t.filePath = filepath
+	for {
+		select {
+		case <-t.Done:
+			t.Dump()
+			return
+
+		case metric := <-t.MetricsChannel:
+			t.mu.Lock()
+			t.buffer = append(t.buffer, metric)
+			if len(t.buffer) >= 100 {
+				t.Dump()
+				t.buffer = nil
+			}
+			t.mu.Unlock()
+		default:
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
+func (t *TimeSeries) Dump() {
 	file, err := os.OpenFile(t.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println("Open file error:", err)
