@@ -2,25 +2,23 @@ package container
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 )
 
-type Container struct {
-	ContainerID      string `json:"container_id"`
-	ContainerImage   string `json:"container_image"`
-	ContainerName    string `json:"container_name"`
-	ContainerStatus  string `json:"container_status"`
-	ContainerCreated string `json:"container_created"`
-	ContainerNetwork string `json:"container_network"`
-}
-
 var (
-	cli *client.Client
-	ctx context.Context
+	cli       *client.Client
+	ctx       context.Context
+	statsPool = sync.Pool{
+		New: func() any {
+			return &container.StatsResponse{}
+		},
+	}
 )
 
 func GetClient() *client.Client {
@@ -47,12 +45,18 @@ func GetContainerList(cli *client.Client) ([]string, error) {
 	return containerIds, nil
 }
 
-func GetContainerData(cli *client.Client, containerId string) (*container.StatsResponseReader, error) {
+func GetContainerData(cli *client.Client, containerId string) (*Container, error) {
 	stats, err := cli.ContainerStatsOneShot(ctx, containerId)
+	defer stats.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error in getting container stats: %v", err)
 	}
-	return &stats, nil
+	statsData := statsPool.Get().(*container.StatsResponse)
+	if err := json.NewDecoder(stats.Body).Decode(statsData); err != nil {
+		return nil, fmt.Errorf("error in decoding container stats: %v", err)
+	}
+	//metric := NewMetrics(statsData)
+	return &Container{}, nil
 
 }
 
@@ -66,4 +70,42 @@ func GetImageList(cli *client.Client) ([]string, error) {
 		imageIds = append(imageIds, img.ID)
 	}
 	return imageIds, nil
+}
+
+func NewMetrics(statsData *container.StatsResponse) Stats {
+	return Stats{
+		CpuUsage: calculateCPUPercent(statsData),
+		MemUsage: calculateMemUsage(statsData),
+		NetIO:    calculateNetIO(statsData),
+		DiskIO:   calculateDiskIO(statsData),
+	}
+
+}
+
+func calculateCPUPercent(stat *container.StatsResponse) float64 {
+	cpuDelta := float64(stat.CPUStats.CPUUsage.TotalUsage - stat.PreCPUStats.CPUUsage.TotalUsage)
+	systemDelta := float64(stat.CPUStats.SystemUsage - stat.PreCPUStats.SystemUsage)
+	if systemDelta > 0.0 && cpuDelta > 0.0 {
+		return (cpuDelta / systemDelta) * float64(len(stat.CPUStats.CPUUsage.PercpuUsage)) * 100.0
+	}
+	return 0.0
+}
+
+func calculateMemUsage(stat *container.StatsResponse) float64 {
+	return float64(stat.MemoryStats.Usage) / (1024 * 1024)
+}
+
+func calculateNetIO(stat *container.StatsResponse) float64 {
+	if len(stat.Networks) > 0 {
+		for _, net := range stat.Networks {
+			return float64(net.RxBytes+net.TxBytes) / (1024 * 1024)
+		}
+	}
+	return 0.0
+}
+func calculateDiskIO(stat *container.StatsResponse) float64 {
+	if len(stat.BlkioStats.IoServiceBytesRecursive) > 0 {
+		return float64(stat.BlkioStats.IoServiceBytesRecursive[0].Value) / (1024 * 1024)
+	}
+	return 0.0
 }
