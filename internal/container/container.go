@@ -67,11 +67,3 @@ func GetImageList(cli *client.Client) ([]string, error) {
 	}
 	return imageIds, nil
 }
-
-func checkClient() {
-	if cli != nil {
-		return
-	} else {
-		panic("client not initialized")
-	}
-}

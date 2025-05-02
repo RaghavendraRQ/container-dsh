@@ -30,7 +30,6 @@ var (
 	statsPool  sync.Pool
 	timeLogger logger.TimeSeries
 	wg         sync.WaitGroup
-	buffer     []logger.MetricEntry
 )
 
 func init() {
@@ -74,13 +73,6 @@ func startTimeLogger(wg *sync.WaitGroup) {
 		defer wg.Done()
 		startTime := time.Now()
 		for {
-			timeLogger.MetricsChannel <- logger.MetricEntry{
-				TimeStamp:   time.Now(),
-				ContainerId: "0de5244ede",
-				Metric:      "cpu_usage",
-				Value:       0.0,
-			}
-
 			if time.Since(startTime) >= TIMELOGEND {
 				timeLogger.Done <- true
 				return
@@ -108,13 +100,6 @@ func GetContainerData(cli *client.Client, containers []container.Summary) {
 			}
 
 			metrics := NewMetrics(statsData)
-			buffer = append(buffer, logger.MetricEntry{
-				TimeStamp:   time.Now(),
-				ContainerId: id,
-				Metric:      "cpu_usage",
-				Value:       metrics.CPUUsage,
-			})
-
 			sendMetricsToLogger(id, metrics)
 			PrintPretty(id, metrics)
 
