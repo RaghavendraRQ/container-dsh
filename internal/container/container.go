@@ -48,10 +48,10 @@ func GetContainerList(cli *client.Client) ([]string, error) {
 
 func GetContainerData(cli *client.Client, containerId string) (*Container, error) {
 	stats, err := cli.ContainerStatsOneShot(ctx, containerId)
-	defer stats.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error in getting container stats: %v", err)
 	}
+	defer stats.Body.Close()
 	statsData := statsPool.Get().(*container.StatsResponse)
 	if err := json.NewDecoder(stats.Body).Decode(statsData); err != nil {
 		return nil, fmt.Errorf("error in decoding container stats: %v", err)
