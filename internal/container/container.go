@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/docker/docker/api/types/container"
@@ -108,4 +109,13 @@ func calculateDiskIO(stat *container.StatsResponse) float64 {
 		return float64(stat.BlkioStats.IoServiceBytesRecursive[0].Value) / (1024 * 1024)
 	}
 	return 0.0
+}
+
+func RunConainer(cli *client.Client, image string) {
+	err := cli.ContainerStart(ctx, image, container.StartOptions{})
+	if err != nil {
+		fmt.Println("Can't able to start image")
+	}
+	log.Println("Started: ", image)
+
 }
