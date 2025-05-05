@@ -3,6 +3,7 @@ package main
 import (
 	"container-dsh/internal/container"
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -13,11 +14,15 @@ func main() {
 	}
 	for _, containerId := range containers {
 		fmt.Println("Container ID: ", containerId)
+		go func() {
+			containerData, err := container.GetContainerData(cli, containerId)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(containerData.String())
+		}()
 	}
-	images, _ := container.GetImageList(cli)
-
-	for _, image := range images {
-		fmt.Println("image ID: ", image)
-	}
+	// Wait for goroutines to finish
+	time.Sleep(2 * time.Second)
 
 }

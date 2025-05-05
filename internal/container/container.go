@@ -46,18 +46,22 @@ func GetContainerList(cli *client.Client) ([]string, error) {
 	return containerIds, nil
 }
 
-func GetContainerData(cli *client.Client, containerId string) (*Container, error) {
+func GetContainerData(cli *client.Client, containerId string) (Container, error) {
 	stats, err := cli.ContainerStatsOneShot(ctx, containerId)
 	if err != nil {
-		return nil, fmt.Errorf("error in getting container stats: %v", err)
+		return Container{}, fmt.Errorf("error in getting container stats: %v", err)
 	}
 	defer stats.Body.Close()
 	statsData := statsPool.Get().(*container.StatsResponse)
 	if err := json.NewDecoder(stats.Body).Decode(statsData); err != nil {
-		return nil, fmt.Errorf("error in decoding container stats: %v", err)
+		return Container{}, fmt.Errorf("error in decoding container stats: %v", err)
 	}
-	//metric := NewMetrics(statsData)
-	return &Container{}, nil
+	return Container{
+		Stats:  NewMetrics(statsData),
+		ID:     containerId,
+		Name:   statsData.Name,
+		Status: Running,
+	}, nil
 
 }
 

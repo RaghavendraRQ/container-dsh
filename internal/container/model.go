@@ -1,5 +1,7 @@
 package container
 
+import "fmt"
+
 //go:generate stringer -type=Status -linecomments
 type Status uint
 
@@ -24,10 +26,18 @@ type Container struct {
 	Stats
 	ID     string `json:"id"`
 	Name   string `json:"name"`
-	Status string `json:"status"`
+	Status Status `json:"status"`
 }
 
 type ContainerSData struct {
 	Containers []Container `json:"containers"`
 	Total      int         `json:"total"`
+}
+
+func (s *Stats) String() string {
+	return fmt.Sprint("CPU Usage: ", s.CpuUsage, " Mem Usage: ", s.MemUsage, " Net IO: ", s.NetIO, " Disk IO: ", s.DiskIO)
+}
+
+func (c *Container) String() string {
+	return fmt.Sprint("ID: ", c.ID[:10], " Name: ", c.Name, " Status: ", c.Status, " Stats: ", c.Stats.String())
 }
