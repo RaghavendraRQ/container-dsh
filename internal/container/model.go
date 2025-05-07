@@ -2,7 +2,7 @@ package container
 
 import "fmt"
 
-//go:generate stringer -type=Status -linecomments
+//go:generate stringer -type=Status
 type Status uint
 
 const (
@@ -39,5 +39,5 @@ func (s *Stats) String() string {
 }
 
 func (c *Container) String() string {
-	return fmt.Sprint("ID: ", c.ID[:10], " Name: ", c.Name, " Status: ", c.Status, " Stats: ", c.Stats.String())
+	return fmt.Sprint("ID: ", c.ID[:10], " Name: ", c.Name, " Status:", c.Status.String(), " Stats: [", c.Stats.String(), "]")
 }
