@@ -39,8 +39,9 @@ func main() {
 	}
 	wg.Wait()
 	timeLogger.Done <- true
+	timeLogger.Wg.Wait()
 
-	time.Sleep(1 * time.Second)
+	//time.Sleep(1 * time.Second)
 
 }
 

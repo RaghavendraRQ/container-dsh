@@ -17,6 +17,7 @@ type MetricEntry struct {
 
 type TimeSeries struct {
 	mu             sync.Mutex
+	Wg             sync.WaitGroup
 	Buffer         []MetricEntry `json:"timeseries"`
 	filePath       string
 	Done           chan bool
@@ -25,6 +26,8 @@ type TimeSeries struct {
 
 func (t *TimeSeries) Start(filepath string) {
 	t.filePath = filepath
+	t.Wg.Add(1)
+	defer t.Wg.Done()
 	for {
 		select {
 		case <-t.Done:
