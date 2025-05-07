@@ -28,10 +28,17 @@ func (t *TimeSeries) Start(filepath string) {
 	for {
 		select {
 		case <-t.Done:
+			log.Print("Done Channel recieived...")
+			t.mu.Lock()
 			t.Dump()
+			t.mu.Unlock()
 			return
 
-		case metric := <-t.MetricsChannel:
+		case metric, ok := <-t.MetricsChannel:
+			if !ok {
+				t.Dump()
+				return
+			}
 			t.mu.Lock()
 			t.Buffer = append(t.Buffer, metric)
 			if len(t.Buffer) >= 100 {
@@ -39,8 +46,6 @@ func (t *TimeSeries) Start(filepath string) {
 				t.Buffer = nil
 			}
 			t.mu.Unlock()
-		default:
-			time.Sleep(100 * time.Millisecond)
 		}
 	}
 }
@@ -52,6 +57,11 @@ func (t *TimeSeries) Dump() {
 		return
 	}
 	defer file.Close()
+
+	if len(t.Buffer) == 0 {
+		log.Println("Buffer is empty, nothing to write")
+		return
+	}
 
 	if err := json.NewEncoder(file).Encode(t.Buffer); err != nil {
 		log.Println("Error while inserting log:", err)
