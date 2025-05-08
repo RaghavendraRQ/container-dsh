@@ -2,6 +2,7 @@ package main
 
 import (
 	"container-dsh/internal/container"
+	"container-dsh/pkg/aggr"
 	"container-dsh/pkg/logger"
 	"fmt"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 var (
 	timeLogger logger.TimeSeries
+	aggregator *aggr.Aggregator
 	wg         = sync.WaitGroup{}
 )
 
@@ -19,6 +21,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	aggregator = aggr.NewAggregator("aggregator.json", 1*time.Second)
 	timeLogger = logger.TimeSeries{
 		MetricsChannel: make(chan logger.MetricEntry),
 		Done:           make(chan bool),
