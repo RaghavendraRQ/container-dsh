@@ -24,8 +24,6 @@ type TimeSeries struct {
 	MetricsChannel chan MetricEntry
 }
 
-func NewTimeLogger() *TimeSeries
-
 func (t *TimeSeries) Start(filepath string) {
 	t.filePath = filepath
 	t.Wg.Add(1)

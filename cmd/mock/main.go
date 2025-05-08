@@ -11,7 +11,7 @@ import (
 
 var (
 	timeLogger logger.TimeSeries
-	aggregator *aggr.Aggregator
+	manager    *aggr.AggregatorManager
 	wg         = sync.WaitGroup{}
 )
 
@@ -21,12 +21,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	aggregator = aggr.NewAggregator("aggregator.json", 1*time.Second)
 	timeLogger = logger.TimeSeries{
 		MetricsChannel: make(chan logger.MetricEntry),
 		Done:           make(chan bool),
 	}
+	manager = aggr.NewAggregatorManager(2, 4)
+	go manager.Run()
 	go timeLogger.Start("time3.json")
+
 	for _, containerId := range containers {
 		//fmt.Println("Container ID: ", containerId)
 		wg.Add(1)
@@ -37,12 +39,15 @@ func main() {
 				panic(err)
 			}
 			sendMetricsToLogger(id, containerData)
+			manager.Input <- containerData
 			fmt.Println(containerData.String())
 		}(containerId)
 	}
 	wg.Wait()
 	timeLogger.Done <- true
 	timeLogger.Wg.Wait()
+	time.Sleep(5 * time.Second)
+	manager.Stop()
 
 	//time.Sleep(1 * time.Second)
 
