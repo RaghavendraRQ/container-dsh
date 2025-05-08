@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	timeLogger logger.TimeLogger
+	timeLogger *logger.TimeLogger
 	manager    *aggr.AggregatorManager
 	wg         = sync.WaitGroup{}
 )
@@ -21,7 +21,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	timeLogger = *logger.NewTimeLogger("time.json")
+	manager = aggr.NewAggregatorManager(2, 3)
+	go manager.Run()
+	timeLogger = logger.NewTimeLogger("time.json")
 	go timeLogger.Start()
 	for _, containerId := range containers {
 		//fmt.Println("Container ID: ", containerId)
