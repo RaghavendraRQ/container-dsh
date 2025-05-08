@@ -15,7 +15,7 @@ type MetricEntry struct {
 	Value       float64   `json:"value"`
 }
 
-type TimeSeries struct {
+type TimeLogger struct {
 	mu             sync.Mutex
 	Wg             sync.WaitGroup
 	Buffer         []MetricEntry `json:"timeseries"`
@@ -24,8 +24,15 @@ type TimeSeries struct {
 	MetricsChannel chan MetricEntry
 }
 
-func (t *TimeSeries) Start(filepath string) {
-	t.filePath = filepath
+func NewTimeLogger(filepath string) *TimeLogger {
+	return &TimeLogger{
+		filePath:       filepath,
+		MetricsChannel: make(chan MetricEntry),
+		Done:           make(chan bool),
+	}
+}
+
+func (t *TimeLogger) Start() {
 	t.Wg.Add(1)
 	defer t.Wg.Done()
 	for {
@@ -53,7 +60,7 @@ func (t *TimeSeries) Start(filepath string) {
 	}
 }
 
-func (t *TimeSeries) Dump() {
+func (t *TimeLogger) Dump() {
 	file, err := os.OpenFile(t.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println("Open file error:", err)

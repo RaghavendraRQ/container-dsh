@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	timeLogger logger.TimeSeries
+	timeLogger logger.TimeLogger
 	wg         = sync.WaitGroup{}
 )
 
@@ -19,11 +19,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	timeLogger = logger.TimeSeries{
-		MetricsChannel: make(chan logger.MetricEntry),
-		Done:           make(chan bool),
-	}
-	go timeLogger.Start("time3.json")
+	timeLogger = *logger.NewTimeLogger("time.json")
+	go timeLogger.Start()
 	for _, containerId := range containers {
 		//fmt.Println("Container ID: ", containerId)
 		wg.Add(1)

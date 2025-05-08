@@ -28,7 +28,7 @@ const (
 var (
 	ctx        context.Context
 	statsPool  sync.Pool
-	timeLogger logger.TimeSeries
+	timeLogger logger.TimeLogger
 	wg         sync.WaitGroup
 )
 
@@ -64,11 +64,8 @@ func Start(haveTimeLogger bool) error {
 }
 
 func startTimeLogger(wg *sync.WaitGroup) {
-	timeLogger = logger.TimeSeries{
-		MetricsChannel: make(chan logger.MetricEntry),
-		Done:           make(chan bool),
-	}
-	go timeLogger.Start(TIMEFILE)
+	timeLogger = *logger.NewTimeLogger(TIMEFILE)
+	go timeLogger.Start()
 	go func() {
 		defer wg.Done()
 		startTime := time.Now()
