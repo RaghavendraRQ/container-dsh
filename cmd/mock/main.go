@@ -2,6 +2,7 @@ package main
 
 import (
 	"container-dsh/internal/container"
+	"container-dsh/pkg/aggr"
 	"container-dsh/pkg/logger"
 	"fmt"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 var (
 	timeLogger logger.TimeLogger
+	manager    *aggr.AggregatorManager
 	wg         = sync.WaitGroup{}
 )
 
@@ -31,12 +33,15 @@ func main() {
 				panic(err)
 			}
 			sendMetricsToLogger(id, containerData)
+			manager.Input <- containerData
 			fmt.Println(containerData.String())
 		}(containerId)
 	}
 	wg.Wait()
 	timeLogger.Done <- true
 	timeLogger.Wg.Wait()
+	time.Sleep(5 * time.Second)
+	manager.Stop()
 
 	//time.Sleep(1 * time.Second)
 
