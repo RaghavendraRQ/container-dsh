@@ -12,7 +12,7 @@ const (
 	URL string = ":8080"
 )
 
-func Run() {
+func Run() error {
 	muxRouter := mux.NewRouter()
 	muxRouter.Use(loggerMiddleWare)
 	muxRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +20,9 @@ func Run() {
 	}).Methods("GET")
 	muxRouter.HandleFunc("/metrics", GetMetric).Methods("GET")
 	log.Println("Starting HTTP server on port", URL)
-	http.ListenAndServe(URL, muxRouter)
+	muxRouter.HandleFunc("/ws", wsHandler)
+	return http.ListenAndServe(URL, muxRouter)
+
 }
 
 func loggerMiddleWare(next http.Handler) http.Handler {
