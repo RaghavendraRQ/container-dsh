@@ -71,7 +71,7 @@ func startTimeLogger(wg *sync.WaitGroup) {
 		startTime := time.Now()
 		for {
 			if time.Since(startTime) >= TIMELOGEND {
-				timeLogger.Done <- true
+				timeLogger.QuitCh <- true
 				return
 			}
 
@@ -106,26 +106,26 @@ func GetContainerData(cli *client.Client, containers []container.Summary) {
 }
 
 func sendMetricsToLogger(id string, metric Metrics) {
-	if timeLogger.MetricsChannel != nil {
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+	if timeLogger.InputCh != nil {
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "cpu_usage",
 			Value:       metric.CPUUsage,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "mem_usage",
 			Value:       metric.MemUsage,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "net_io",
 			Value:       metric.NetIO,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "disk_io",

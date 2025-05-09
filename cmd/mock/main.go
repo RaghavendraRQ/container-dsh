@@ -40,8 +40,8 @@ func main() {
 		}(containerId)
 	}
 	wg.Wait()
-	timeLogger.Done <- true
-	timeLogger.Wg.Wait()
+	timeLogger.QuitCh <- true
+	timeLogger.Wait()
 	time.Sleep(5 * time.Second)
 	manager.Stop()
 
@@ -50,26 +50,26 @@ func main() {
 }
 
 func sendMetricsToLogger(id string, metric container.Container) {
-	if timeLogger.MetricsChannel != nil {
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+	if timeLogger.InputCh != nil {
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "cpu_usage",
 			Value:       metric.CpuUsage,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "mem_usage",
 			Value:       metric.MemUsage,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "net_io",
 			Value:       metric.NetIO,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "disk_io",

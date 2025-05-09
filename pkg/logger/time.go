@@ -16,35 +16,35 @@ type MetricEntry struct {
 }
 
 type TimeLogger struct {
-	mu             sync.Mutex
-	Wg             sync.WaitGroup
-	Buffer         []MetricEntry `json:"timeseries"`
-	filePath       string
-	Done           chan bool
-	MetricsChannel chan MetricEntry
+	sync.WaitGroup
+	mu       sync.Mutex
+	Buffer   []MetricEntry `json:"timeseries"`
+	filePath string
+	QuitCh   chan bool
+	InputCh  chan MetricEntry
 }
 
 func NewTimeLogger(filepath string) *TimeLogger {
 	return &TimeLogger{
-		filePath:       filepath,
-		MetricsChannel: make(chan MetricEntry),
-		Done:           make(chan bool),
+		filePath: filepath,
+		InputCh:  make(chan MetricEntry),
+		QuitCh:   make(chan bool),
 	}
 }
 
 func (t *TimeLogger) Start() {
-	t.Wg.Add(1)
-	defer t.Wg.Done()
+	t.Add(1)
+	defer t.Done()
 	for {
 		select {
-		case <-t.Done:
+		case <-t.QuitCh:
 			log.Print("Done Channel recieived...")
 			t.mu.Lock()
 			t.Dump()
 			t.mu.Unlock()
 			return
 
-		case metric, ok := <-t.MetricsChannel:
+		case metric, ok := <-t.InputCh:
 			if !ok {
 				t.Dump()
 				return
