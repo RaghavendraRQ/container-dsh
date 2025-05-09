@@ -42,5 +42,4 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(containerId + "\n"))
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Metrics"))
 }
