@@ -17,7 +17,7 @@
     let ws;
 
     function connect() {
-        ws = new WebSocket("ws://localhost:8080/ws");
+        ws = new WebSocket("ws://localhost:8080/ws/anc");
 
         ws.onopen = function() {
             console.log("Connected to WebSocket server");

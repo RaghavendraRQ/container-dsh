@@ -21,7 +21,7 @@ var (
 
 func webSocketHandler(webSocketRouter *mux.Router) {
 	webSocketRouter.HandleFunc("/", wsHandler)
-	webSocketRouter.HandleFunc("/{id}", wsContainerHandler)
+	webSocketRouter.HandleFunc("/anc", wsContainerHandler)
 }
 
 func wsContainerHandler(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +80,7 @@ func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
 		if err != nil {
 			log.Println("Error getting container data:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte("No data"))
-			break
+			continue
 		}
 		if err := conn.WriteMessage(websocket.TextMessage, []byte(metrics.String())); err != nil {
 			log.Println("Error writing message:", err)
