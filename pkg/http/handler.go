@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 const (
@@ -25,7 +26,17 @@ func Run() error {
 	webSocketHandler(webSocketRouter)
 
 	muxRouter.HandleFunc("/metrics", GetMetric).Methods("GET")
-	return http.ListenAndServe(URL, muxRouter)
+
+    c := cors.New(cors.Options{
+        AllowedOrigins:   []string{"http://localhost:3000"}, 
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type"},
+		AllowCredentials: true,
+ 
+    })
+    corsHandler := c.Handler(muxRouter)
+
+	return http.ListenAndServe(URL, corsHandler)
 
 }
 
