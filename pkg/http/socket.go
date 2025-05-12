@@ -26,7 +26,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	cli := container.GetClient()
-	handleMetrics(conn, cli)
+	//handleMetrics(conn, cli)
+	handleSingleContainer(conn, cli)
 }
 
 func handleMetrics(conn *websocket.Conn, cli *client.Client) {
@@ -47,5 +48,27 @@ func handleMetrics(conn *websocket.Conn, cli *client.Client) {
 			log.Println("Error writing message:", err)
 			break
 		}
+	}
+}
+
+func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
+	for {
+		_, containerId, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message:", err)
+			break
+		}
+		log.Printf("Received message: %s\n", containerId)
+		metrics, err := container.GetContainerData(cli, string(containerId))
+		if err != nil {
+			log.Println("Error getting container data:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte("No data"))
+			break
+		}
+		if err := conn.WriteMessage(websocket.TextMessage, []byte(metrics.String())); err != nil {
+			log.Println("Error writing message:", err)
+			break
+		}
+		log.Printf("Container data: %s\n", metrics.String())
 	}
 }

@@ -15,11 +15,13 @@ const (
 func Run() error {
 	muxRouter := mux.NewRouter()
 	muxRouter.Use(loggerMiddleWare)
+
 	muxRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Welcome to the Container Metrics API"))
 	}).Methods("GET")
 	log.Println("Starting HTTP server on port", URL)
-	muxRouter.HandleFunc("/ws", wsHandler)
+
+	muxRouter.HandleFunc("/ws", wsHandler) // For websocket connection
 	muxRouter.HandleFunc("/metrics", GetMetric).Methods("GET")
 	return http.ListenAndServe(URL, muxRouter)
 
