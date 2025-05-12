@@ -21,7 +21,9 @@ func Run() error {
 	}).Methods("GET")
 	log.Println("Starting HTTP server on port", URL)
 
-	muxRouter.HandleFunc("/ws", wsHandler) // For websocket connection
+	webSocketRouter := muxRouter.PathPrefix("/ws").Subrouter()
+	webSocketHandler(webSocketRouter)
+
 	muxRouter.HandleFunc("/metrics", GetMetric).Methods("GET")
 	return http.ListenAndServe(URL, muxRouter)
 

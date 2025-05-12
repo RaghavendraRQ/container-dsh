@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/docker/docker/client"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,6 +19,23 @@ var (
 	}
 )
 
+func webSocketHandler(webSocketRouter *mux.Router) {
+	webSocketRouter.HandleFunc("/", wsHandler)
+	webSocketRouter.HandleFunc("/{id}", wsContainerHandler)
+}
+
+func wsContainerHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		http.Error(w, "Failed to upgrade connection", http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	cli := container.GetClient()
+	handleSingleContainer(conn, cli)
+}
+
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -26,8 +44,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	cli := container.GetClient()
-	//handleMetrics(conn, cli)
-	handleSingleContainer(conn, cli)
+	handleMetrics(conn, cli)
 }
 
 func handleMetrics(conn *websocket.Conn, cli *client.Client) {
