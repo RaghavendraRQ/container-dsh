@@ -50,12 +50,12 @@ func handleMetrics(conn *websocket.Conn, cli *client.Client) {
 		//}
 		//log.Printf("Received message: %s\n", message)
 		containerIds, _ := container.GetContainerList(cli)
-		bytes, err := json.Marshal(containerIds)
+		bytes, err := json.MarshalIndent(containerIds, "", " ")
 		if err != nil {
 			log.Println("Error marshalling data:", err)
 			break
 		}
-		if err := conn.WriteMessage(websocket.TextMessage, bytes); err != nil {
+		if err := conn.WriteJSON(bytes); err != nil {
 			log.Println("Error writing message:", err)
 			break
 		}
@@ -76,7 +76,12 @@ func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
 			conn.WriteMessage(websocket.TextMessage, []byte("No data"))
 			continue
 		}
-		if err := conn.WriteMessage(websocket.TextMessage, []byte(metrics.String())); err != nil {
+		bytes, err := json.MarshalIndent(metrics, "", " ")
+		if err != nil {
+			log.Println("Error marshalling data:", err)
+			break
+		}
+		if err := conn.WriteJSON(bytes); err != nil {
 			log.Println("Error writing message:", err)
 			break
 		}
