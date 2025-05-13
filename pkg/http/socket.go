@@ -4,6 +4,7 @@ import (
 	"container-dsh/internal/container"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/docker/docker/client"
 	"github.com/gorilla/websocket"
@@ -15,6 +16,7 @@ var (
 			return true
 		},
 	}
+	METRICSREFRESHTIME = time.Second * 1
 )
 
 func wsContainerHandler(w http.ResponseWriter, r *http.Request) {
@@ -41,24 +43,20 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMetrics(conn *websocket.Conn, cli *client.Client) {
-	for {
-		//_, message, err := conn.ReadMessage()
-		//if err != nil {
-		//log.Println("Error reading message:", err)
-		//break
-		//}
-		//log.Printf("Received message: %s\n", message)
+	ticker := time.NewTicker(METRICSREFRESHTIME)
+	for range ticker.C {
+		// Handle the ticker event
 		containerIds, _ := container.GetContainerList(cli)
 		if err := conn.WriteJSON(containerIds); err != nil {
 			log.Println("Error writing message:", err)
 			break
-		}
+		} //log.Println("Ticker event")
 	}
 }
 
 func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
 	for {
-        _, containerId, err := conn.ReadMessage()
+		_, containerId, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error reading message:", err)
 			break
