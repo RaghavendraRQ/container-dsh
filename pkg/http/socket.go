@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/docker/docker/client"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,11 +17,6 @@ var (
 		},
 	}
 )
-
-func webSocketHandler(webSocketRouter *mux.Router) {
-	webSocketRouter.HandleFunc("/", wsHandler)
-	webSocketRouter.HandleFunc("/anc", wsContainerHandler)
-}
 
 func wsContainerHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)

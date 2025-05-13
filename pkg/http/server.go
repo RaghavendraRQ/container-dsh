@@ -1,7 +1,6 @@
 package http
 
 import (
-	"container-dsh/internal/container"
 	"log"
 	"net/http"
 
@@ -27,7 +26,7 @@ func Run() error {
 	muxRouter.Use(loggerMiddleWare)
 
 	// HTTP Routes
-	muxRouter.HandleFunc("/metrics", GetMetric).Methods("GET")
+	httpHandler(muxRouter)
 
 	// WS Routes
 	webSocketRouter := muxRouter.PathPrefix("/ws").Subrouter()
@@ -40,16 +39,12 @@ func Run() error {
 
 }
 
-func GetMetric(w http.ResponseWriter, r *http.Request) {
-	cli := container.GetClient()
-	containers, err := container.GetContainerList(cli)
-	if err != nil {
-		panic(err)
-	}
+func httpHandler(muxRouter *mux.Router) {
+	muxRouter.HandleFunc("/", HomeHandler).Methods("GET")
+	muxRouter.HandleFunc("/metrics", GetMetric).Methods("GET")
+}
 
-	w.Write([]byte("Container IDs: "))
-	for _, containerId := range containers {
-		w.Write([]byte(containerId + "\n"))
-	}
-	w.WriteHeader(http.StatusOK)
+func webSocketHandler(webSocketRouter *mux.Router) {
+	webSocketRouter.HandleFunc("/", wsHandler)
+	webSocketRouter.HandleFunc("/anc", wsContainerHandler)
 }
