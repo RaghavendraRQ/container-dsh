@@ -2,7 +2,6 @@ package http
 
 import (
 	"container-dsh/internal/container"
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -50,12 +49,7 @@ func handleMetrics(conn *websocket.Conn, cli *client.Client) {
 		//}
 		//log.Printf("Received message: %s\n", message)
 		containerIds, _ := container.GetContainerList(cli)
-		bytes, err := json.MarshalIndent(containerIds, "", " ")
-		if err != nil {
-			log.Println("Error marshalling data:", err)
-			break
-		}
-		if err := conn.WriteJSON(bytes); err != nil {
+		if err := conn.WriteJSON(containerIds); err != nil {
 			log.Println("Error writing message:", err)
 			break
 		}
@@ -64,7 +58,7 @@ func handleMetrics(conn *websocket.Conn, cli *client.Client) {
 
 func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
 	for {
-		_, containerId, err := conn.ReadMessage()
+        _, containerId, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error reading message:", err)
 			break
@@ -76,12 +70,7 @@ func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
 			conn.WriteMessage(websocket.TextMessage, []byte("No data"))
 			continue
 		}
-		bytes, err := json.MarshalIndent(metrics, "", " ")
-		if err != nil {
-			log.Println("Error marshalling data:", err)
-			break
-		}
-		if err := conn.WriteJSON(bytes); err != nil {
+		if err := conn.WriteJSON(metrics); err != nil {
 			log.Println("Error writing message:", err)
 			break
 		}
