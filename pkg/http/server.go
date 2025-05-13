@@ -45,6 +45,6 @@ func httpHandler(muxRouter *mux.Router) {
 }
 
 func webSocketHandler(webSocketRouter *mux.Router) {
-	webSocketRouter.HandleFunc("/", wsHandler)
-	webSocketRouter.HandleFunc("/anc", wsContainerHandler)
+	webSocketRouter.HandleFunc("", wsHandler)
+	webSocketRouter.HandleFunc("/container", wsContainerHandler)
 }
