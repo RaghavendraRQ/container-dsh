@@ -45,12 +45,11 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 func handleMetrics(conn *websocket.Conn, cli *client.Client) {
 	ticker := time.NewTicker(METRICSREFRESHTIME)
 	for range ticker.C {
-		// Handle the ticker event
 		containerIds, _ := container.GetContainerList(cli)
 		if err := conn.WriteJSON(containerIds); err != nil {
 			log.Println("Error writing message:", err)
 			break
-		} //log.Println("Ticker event")
+		}
 	}
 }
 

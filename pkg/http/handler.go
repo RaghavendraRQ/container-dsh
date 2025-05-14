@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func loggerMiddleWare(next http.Handler) http.Handler {
@@ -39,3 +41,38 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 }
+
+
+func GetMetricById(w http.ResponseWriter, r *http.Request) { 
+    cli := container.GetClient()
+    containerId := mux.Vars(r)["id"]
+
+    stats, err := container.GetContainerData(cli, containerId)
+
+    if err != nil {
+        http.Error(w, "Failed to fetch the data", http.StatusNotFound)
+        return
+    }
+
+    bytes, err := json.Marshal(stats)
+
+    if err != nil {
+        http.Error(w, "Error in encoding", http.StatusInternalServerError)
+        return
+    }
+    w.Write(bytes)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
