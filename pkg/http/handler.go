@@ -24,8 +24,14 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(containers)
-	w.WriteHeader(http.StatusOK)
+
+    bytes, err := json.MarshalIndent(containers, "", " ")
+    if err != nil {
+        http.Error(w, "Error in encoding", http.StatusInternalServerError)
+        return
+    }
+    w.Write(bytes)
+
 }
 
 func GetMetric(w http.ResponseWriter, r *http.Request) {
