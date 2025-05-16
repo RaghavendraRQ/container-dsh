@@ -25,10 +25,9 @@ func wsContainerHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to upgrade connection", http.StatusInternalServerError)
 		return
 	}
-	defer conn.Close()
 
 	cli := container.GetClient()
-	handleSingleContainer(conn, cli)
+	go handleSingleContainer(conn, cli)
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,23 +53,40 @@ func handleMetrics(conn *websocket.Conn, cli *client.Client) {
 }
 
 func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
+	defer conn.Close()
+
 	for {
-		_, containerId, err := conn.ReadMessage()
+		messageType, message, err := conn.ReadMessage()
 		if err != nil {
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("WebSocket connection closed: %v", err)
+				return
+			}
 			log.Println("Error reading message:", err)
-			break
+			return
 		}
-		log.Printf("Received message: %s\n", containerId)
-		metrics, err := container.GetContainerData(cli, string(containerId))
+		log.Printf("Received message: %s\n", message)
+
+		if messageType == websocket.CloseMessage {
+			log.Printf("WebSocket close message received: %s\n", message)
+			return
+		}
+
+		metrics, err := container.GetContainerData(cli, string(message))
 		if err != nil {
 			log.Println("Error getting container data:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte("No data"))
 			continue
 		}
-		if err := conn.WriteJSON(metrics); err != nil {
-			log.Println("Error writing message:", err)
-			break
+
+		ticker := time.NewTicker(METRICSREFRESHTIME)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := conn.WriteJSON(metrics); err != nil {
+				log.Println("Error writing message:", err)
+				return
+			}
+			log.Printf("Container data: %s\n", metrics.String())
 		}
-		log.Printf("Container data: %s\n", metrics.String())
 	}
 }

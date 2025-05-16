@@ -42,7 +42,7 @@ func Run() error {
 func httpHandler(muxRouter *mux.Router) {
 	muxRouter.HandleFunc("/", HomeHandler).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/metrics", GetMetric).Methods(http.MethodGet)
-    muxRouter.HandleFunc("/metrics/{id}", GetMetricById).Methods(http.MethodGet)
+	muxRouter.HandleFunc("/metrics/{id}", GetMetricById).Methods(http.MethodGet)
 }
 
 func webSocketHandler(webSocketRouter *mux.Router) {
