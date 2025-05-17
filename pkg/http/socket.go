@@ -36,12 +36,12 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to upgrade connection", http.StatusInternalServerError)
 		return
 	}
-	defer conn.Close()
 	cli := container.GetClient()
-	handleMetrics(conn, cli)
+	go handleMetrics(conn, cli)
 }
 
 func handleMetrics(conn *websocket.Conn, cli *client.Client) {
+	defer conn.Close()
 	ticker := time.NewTicker(METRICSREFRESHTIME)
 	for range ticker.C {
 		containerIds, _ := container.GetContainerList(cli)
