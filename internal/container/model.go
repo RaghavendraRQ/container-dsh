@@ -5,14 +5,16 @@ import "fmt"
 //go:generate stringer -type=Status
 type Status uint
 
+// created", "running", "paused", "restarting", "removing", "exited", or "dead
 const (
 	_ Status = iota
 	Created
 	Running
 	Paused
-	UnPaused
-	Stopped
-	Removed
+	Restarting
+	Removing
+	Exited
+	Dead
 )
 
 type Stats struct {

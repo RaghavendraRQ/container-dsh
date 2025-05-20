@@ -1,12 +1,14 @@
 package main
 
 import (
-	"container-dsh/pkg/collector"
-	"time"
+	"container-dsh/internal/container"
+	"fmt"
 )
 
 func main() {
-	collector.Start(true)
+	cli := container.GetClient()
+	status, _ := container.GetStatusById(cli, "69e139e71e16")
 
-	time.Sleep(2 * time.Second)
+	fmt.Println("Container Status: ", status)
+
 }

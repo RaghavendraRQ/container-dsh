@@ -123,3 +123,11 @@ func RunConainer(cli *client.Client, image string) {
 	log.Println("Started: ", image)
 
 }
+
+func GetStatusById(cli *client.Client, containerId string) (string, error) {
+	containerJSON, err := cli.ContainerInspect(ctx, containerId)
+	if err != nil {
+		return "", fmt.Errorf("error in getting container status: %v", err)
+	}
+	return containerJSON.State.Status, nil
+}
