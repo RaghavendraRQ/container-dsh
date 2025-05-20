@@ -129,22 +129,9 @@ func GetStatusById(cli *client.Client, containerId string) Status {
 	if err != nil {
 		return Dead
 	}
-	switch containerJSON.State.Status {
-	case "created":
-		return Created
-	case "running":
-		return Running
-	case "paused":
-		return Paused
-	case "restarting":
-		return Restarting
-	case "removing":
-		return Removing
-	case "exited":
-		return Exited
-	case "dead":
-		return Dead
-	default:
+	status, ok := statusMap[containerJSON.State.Status]
+	if !ok {
 		return Dead
 	}
+	return status
 }

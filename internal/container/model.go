@@ -6,6 +6,18 @@ import "fmt"
 type Status uint
 
 // created", "running", "paused", "restarting", "removing", "exited", or "dead
+var (
+	statusMap = map[string]Status{
+		"created":    Created,
+		"running":    Running,
+		"paused":     Paused,
+		"restarting": Restarting,
+		"removing":   Removing,
+		"exited":     Exited,
+		"dead":       Dead,
+	}
+)
+
 const (
 	_ Status = iota
 	Created
