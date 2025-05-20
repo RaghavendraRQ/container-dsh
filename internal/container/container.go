@@ -60,7 +60,7 @@ func GetContainerData(cli *client.Client, containerId string) (Container, error)
 		Stats:  NewMetrics(statsData),
 		ID:     containerId,
 		Name:   statsData.Name,
-		Status: Running,
+		Status: GetStatusById(cli, containerId),
 	}, nil
 
 }
@@ -124,10 +124,27 @@ func RunConainer(cli *client.Client, image string) {
 
 }
 
-func GetStatusById(cli *client.Client, containerId string) (string, error) {
+func GetStatusById(cli *client.Client, containerId string) Status {
 	containerJSON, err := cli.ContainerInspect(ctx, containerId)
 	if err != nil {
-		return "", fmt.Errorf("error in getting container status: %v", err)
+		return Dead
 	}
-	return containerJSON.State.Status, nil
+	switch containerJSON.State.Status {
+	case "created":
+		return Created
+	case "running":
+		return Running
+	case "paused":
+		return Paused
+	case "restarting":
+		return Restarting
+	case "removing":
+		return Removing
+	case "exited":
+		return Exited
+	case "dead":
+		return Dead
+	default:
+		return Dead
+	}
 }
