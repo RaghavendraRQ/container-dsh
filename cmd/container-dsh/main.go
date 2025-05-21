@@ -18,7 +18,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Printf("Usage of %s:\n", os.Args[0])
-		fmt.Println(modeUsage)
+		fmt.Println("Welcome to Container-dsh, Below are the supported flags")
 		flag.PrintDefaults()
 	}
 
