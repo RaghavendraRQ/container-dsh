@@ -17,8 +17,8 @@ func main() {
 	mode := flag.String("mode", "server", modeUsage)
 
 	flag.Usage = func() {
-		fmt.Printf("Usage of %s:\n", os.Args[0])
-		fmt.Println("Welcome to Container-dsh, Below are the supported flags")
+		fmt.Printf("Usage: %s [--mode=server|cli|mock|logger]\n", os.Args[0])
+		fmt.Println("Description:\n Starts different components of the container dashboard.")
 		flag.PrintDefaults()
 	}
 
