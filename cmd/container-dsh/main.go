@@ -5,8 +5,13 @@ import (
 	"fmt"
 )
 
+const (
+	modeUsage = "Any one of the server, logger, cli, mock\nDefalut is \"Server\""
+	modeError = "Usage: " + modeUsage
+)
+
 func main() {
-	mode := flag.String("mode", "server", "Any one of the server, logger, cli, mock\nDefalut is Server")
+	mode := flag.String("mode", "server", modeUsage)
 	flag.Parse()
 
 	switch *mode {
@@ -19,6 +24,6 @@ func main() {
 	case "mock":
 		fmt.Println("You have choosen mock")
 	default:
-		fmt.Println("Can be ")
+		fmt.Println(modeError)
 	}
 }
