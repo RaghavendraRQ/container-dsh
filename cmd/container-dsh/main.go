@@ -5,15 +5,23 @@ import (
 	"container-dsh/cmd/server"
 	"flag"
 	"fmt"
+	"os"
 )
 
 const (
-	modeUsage = "Any one of the server, logger, cli, mock\nDefalut is \"Server\""
+	modeUsage = "Any one of the server, logger, cli, mock\nDefault is \"Server\""
 	modeError = "Usage: " + modeUsage
 )
 
 func main() {
 	mode := flag.String("mode", "server", modeUsage)
+
+	flag.Usage = func() {
+		fmt.Printf("Usage of %s:\n", os.Args[0])
+		fmt.Println(modeUsage)
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
 
 	switch *mode {
@@ -27,5 +35,6 @@ func main() {
 		mock.Run()
 	default:
 		fmt.Println(modeError)
+		os.Exit(1)
 	}
 }
