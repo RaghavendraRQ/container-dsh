@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"container-dsh/internal/container"
@@ -15,11 +15,11 @@ var (
 	wg         = sync.WaitGroup{}
 )
 
-func main() {
+func Run() {
 	cli := container.GetClient()
 	containers, err := container.GetContainerList(cli)
 	if err != nil {
-		panic(err)
+		panic(err) // TODO: Want to propagate the error
 	}
 	manager = aggr.NewAggregatorManager(2, 3)
 	go manager.Run()
@@ -32,7 +32,7 @@ func main() {
 			defer wg.Done()
 			containerData, err := container.GetContainerData(cli, id)
 			if err != nil {
-				panic(err)
+				panic(err) // TODO: Want to propagate the error
 			}
 			sendMetricsToLogger(id, containerData)
 			manager.Input <- containerData
