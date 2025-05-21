@@ -1,14 +1,24 @@
 package main
 
 import (
-	"container-dsh/internal/container"
+	"flag"
 	"fmt"
 )
 
 func main() {
-	cli := container.GetClient()
-	status := container.GetStatusById(cli, "69e139e71e16")
+	mode := flag.String("mode", "server", "Any one of the server, logger, cli, mock\nDefalut is Server")
+	flag.Parse()
 
-	fmt.Println("Container Status: ", status)
-
+	switch *mode {
+	case "server":
+		fmt.Println("You have choosen server")
+	case "logger":
+		fmt.Println("You have choosen logger")
+	case "cli":
+		fmt.Println("You have choosen cli")
+	case "mock":
+		fmt.Println("You have choosen mock")
+	default:
+		fmt.Println("Can be ")
+	}
 }
