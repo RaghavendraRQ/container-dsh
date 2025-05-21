@@ -1,4 +1,4 @@
-package logger
+package mock
 
 import (
 	"container-dsh/internal/container"

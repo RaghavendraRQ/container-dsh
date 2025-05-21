@@ -1,6 +1,8 @@
 package main
 
 import (
+	"container-dsh/cmd/mock"
+	"container-dsh/cmd/server"
 	"flag"
 	"fmt"
 )
@@ -16,13 +18,13 @@ func main() {
 
 	switch *mode {
 	case "server":
-		fmt.Println("You have choosen server")
+		server.Run()
 	case "logger":
-		fmt.Println("You have choosen logger")
+		fmt.Println("Work In Progress please come back soon")
 	case "cli":
-		fmt.Println("You have choosen cli")
+		fmt.Println("Work In Progress please come back soon")
 	case "mock":
-		fmt.Println("You have choosen mock")
+		mock.Run()
 	default:
 		fmt.Println(modeError)
 	}
