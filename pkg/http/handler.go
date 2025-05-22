@@ -21,16 +21,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	containers, err := container.GetContainerList(cli)
 	if err != nil {
 		http.Error(w, "Failed to get container list", http.StatusInternalServerError)
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-    bytes, err := json.MarshalIndent(containers, "", " ")
-    if err != nil {
-        http.Error(w, "Error in encoding", http.StatusInternalServerError)
-        return
-    }
-    w.Write(bytes)
+	bytes, err := json.MarshalIndent(containers, "", " ")
+	if err != nil {
+		http.Error(w, "Error in encoding", http.StatusInternalServerError)
+		return
+	}
+	w.Write(bytes)
 
 }
 
@@ -48,37 +47,22 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func GetMetricById(w http.ResponseWriter, r *http.Request) {
+	cli := container.GetClient()
+	containerId := mux.Vars(r)["id"]
 
-func GetMetricById(w http.ResponseWriter, r *http.Request) { 
-    cli := container.GetClient()
-    containerId := mux.Vars(r)["id"]
+	stats, err := container.GetContainerData(cli, containerId)
 
-    stats, err := container.GetContainerData(cli, containerId)
+	if err != nil {
+		http.Error(w, "Failed to fetch the data", http.StatusNotFound)
+		return
+	}
 
-    if err != nil {
-        http.Error(w, "Failed to fetch the data", http.StatusNotFound)
-        return
-    }
+	bytes, err := json.Marshal(stats)
 
-    bytes, err := json.Marshal(stats)
-
-    if err != nil {
-        http.Error(w, "Error in encoding", http.StatusInternalServerError)
-        return
-    }
-    w.Write(bytes)
+	if err != nil {
+		http.Error(w, "Error in encoding", http.StatusInternalServerError)
+		return
+	}
+	w.Write(bytes)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
