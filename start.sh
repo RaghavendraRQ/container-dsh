@@ -9,5 +9,8 @@
     # go run ./cmd/container-dsh
 # fi
 
+export PORT=":8080"
+export CLIENT_URL="http://localhost:3000" # Change this later...
+
 go run ./cmd/container-dsh --mode="$1"
 jq . time.json > time2.json

@@ -3,18 +3,20 @@ package http
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
-const (
-	URL string = ":8080"
+var (
+	URL        string = os.Getenv("PORT")
+	CLIENT_URL        = os.Getenv("CLIENT_URL")
 )
 
 var (
 	corsRules = cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{CLIENT_URL},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type"},
 		AllowCredentials: true,
@@ -32,6 +34,7 @@ func Run() error {
 	webSocketRouter := muxRouter.PathPrefix("/ws").Subrouter()
 	webSocketHandler(webSocketRouter)
 
+	//CORS Handler
 	corsHandler := corsRules.Handler(muxRouter)
 
 	log.Println("Starting HTTP server on port", URL)
