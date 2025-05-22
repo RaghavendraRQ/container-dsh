@@ -10,9 +10,23 @@ import (
 )
 
 var (
-	URL        string = os.Getenv("PORT")
-	CLIENT_URL        = os.Getenv("CLIENT_URL")
+	URL        string
+	CLIENT_URL string
 )
+
+func init() {
+	var ok bool
+	URL, ok = os.LookupEnv("PORT")
+
+	if !ok {
+		log.Fatalf("Error Uninitialised URL:PORT")
+	}
+
+	CLIENT_URL, ok = os.LookupEnv("CLIENT_URL")
+	if !ok {
+		log.Fatalf("Error Uninitialised CLIENT_URL:PORT")
+	}
+}
 
 var (
 	corsRules = cors.New(cors.Options{
