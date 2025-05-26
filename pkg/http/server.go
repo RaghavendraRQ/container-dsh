@@ -1,43 +1,28 @@
 package http
 
 import (
+	"container-dsh/internal/config"
+	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
-var (
-	URL        string
-	CLIENT_URL string
-)
-
-func init() {
-	var ok bool
-	URL, ok = os.LookupEnv("PORT")
-
-	if !ok {
-		log.Fatalf("Error Uninitialised URL:PORT")
+func Run() error {
+	//TODO: I know it looks ugly, need to refactor this...
+	cfg, err := config.NewConfig()
+	if err != nil {
+		return fmt.Errorf("error in configuration: %v", err)
 	}
-
-	CLIENT_URL, ok = os.LookupEnv("CLIENT_URL")
-	if !ok {
-		log.Fatalf("Error Uninitialised CLIENT_URL:PORT")
-	}
-}
-
-var (
-	corsRules = cors.New(cors.Options{
-		AllowedOrigins:   []string{CLIENT_URL},
+	corsRules := cors.New(cors.Options{
+		AllowedOrigins:   []string{cfg.CLIENT_URL},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type"},
 		AllowCredentials: true,
 	})
-)
 
-func Run() error {
 	muxRouter := mux.NewRouter()
 	muxRouter.Use(loggerMiddleWare)
 
@@ -51,8 +36,8 @@ func Run() error {
 	//CORS Handler
 	corsHandler := corsRules.Handler(muxRouter)
 
-	log.Println("Starting HTTP server on port", URL)
-	return http.ListenAndServe(URL, corsHandler)
+	log.Println("Starting HTTP server on port", cfg.PORT)
+	return http.ListenAndServe(cfg.PORT, corsHandler)
 
 }
 

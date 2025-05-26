@@ -13,7 +13,7 @@ type Cfg struct {
 func NewConfig() (*Cfg, error) {
 	PORT, ok := os.LookupEnv("PORT")
 	if !ok {
-		PORT = "8080"
+		PORT = ":8080"
 	}
 
 	CLIENT_URL, ok := os.LookupEnv("CLIENT_URL")
