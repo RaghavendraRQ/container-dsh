@@ -23,7 +23,7 @@ func Run() error {
 		AllowCredentials: true,
 	})
 
-	muxRouter := mux.NewRouter()
+	muxRouter := mux.NewRouter().StrictSlash(true)
 	muxRouter.Use(loggerMiddleWare)
 
 	// HTTP Routes
@@ -48,6 +48,6 @@ func httpHandler(muxRouter *mux.Router) {
 }
 
 func webSocketHandler(webSocketRouter *mux.Router) {
-	webSocketRouter.HandleFunc("", wsHandler)
+	webSocketRouter.HandleFunc("/", wsHandler)
 	webSocketRouter.HandleFunc("/container", wsContainerHandler)
 }
