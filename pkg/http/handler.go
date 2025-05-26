@@ -16,6 +16,20 @@ func loggerMiddleWare(next http.Handler) http.Handler {
 	})
 }
 
+func writeJSON(w http.ResponseWriter, status int, data any) {
+	bytes, err := json.MarshalIndent(data, "", " ")
+	if err != nil {
+		http.Error(w, "Error in encoding", status)
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	if _, err := w.Write(bytes); err != nil {
+		http.Error(w, "Error in writing the json data", status)
+		return
+	}
+}
+
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	cli := container.GetClient()
 	containers, err := container.GetContainerList(cli)
@@ -24,17 +38,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bytes, err := json.MarshalIndent(containers, "", " ")
-	if err != nil {
-		http.Error(w, "Error in encoding", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-type", "application/json")
-	if _, err := w.Write(bytes); err != nil {
-		http.Error(w, "Error in writing the json data", http.StatusInternalServerError)
-		return
-	}
+	writeJSON(w, http.StatusInternalServerError, containers)
 }
 
 func GetMetric(w http.ResponseWriter, r *http.Request) {
@@ -44,19 +48,7 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Can't list containers", http.StatusInternalServerError)
 		return
 	}
-	data, err := json.MarshalIndent(containers, "", " ")
-	if err != nil {
-		http.Error(w, "Error in serialising the data", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-type", "application/json")
-	if _, err := w.Write(data); err != nil {
-		http.Error(w, "Error in writing the json data", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+	writeJSON(w, http.StatusInternalServerError, containers)
 }
 
 func GetMetricById(w http.ResponseWriter, r *http.Request) {
@@ -69,16 +61,6 @@ func GetMetricById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch the data", http.StatusNotFound)
 		return
 	}
+	writeJSON(w, http.StatusInternalServerError, stats)
 
-	bytes, err := json.Marshal(stats)
-
-	if err != nil {
-		http.Error(w, "Error in encoding", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-type", "application/json")
-	if _, err := w.Write(bytes); err != nil {
-		http.Error(w, "Error in writing the json data", http.StatusInternalServerError)
-		return
-	}
 }
