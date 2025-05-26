@@ -29,6 +29,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error in encoding", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-type", "application/json")
 	if _, err := w.Write(bytes); err != nil {
 		http.Error(w, "Error in writing the json data", http.StatusInternalServerError)
 		return
@@ -39,16 +41,16 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	cli := container.GetClient()
 	containers, err := container.GetContainerList(cli)
 	if err != nil {
-		panic(err)
+		http.Error(w, "Can't list containers", http.StatusInternalServerError)
+		return
 	}
-
 	data, err := json.MarshalIndent(containers, "", " ")
-
 	if err != nil {
 		http.Error(w, "Error in serialising the data", http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-type", "application/json")
 	if _, err := w.Write(data); err != nil {
 		http.Error(w, "Error in writing the json data", http.StatusInternalServerError)
 		return
@@ -74,6 +76,7 @@ func GetMetricById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error in encoding", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-type", "application/json")
 	if _, err := w.Write(bytes); err != nil {
 		http.Error(w, "Error in writing the json data", http.StatusInternalServerError)
 		return
