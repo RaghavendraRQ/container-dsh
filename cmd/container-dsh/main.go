@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container-dsh/cmd/cli"
 	"container-dsh/cmd/mock"
 	"container-dsh/cmd/server"
 	"flag"
@@ -30,7 +31,7 @@ func main() {
 	case "logger":
 		fmt.Println("Work In Progress please come back soon")
 	case "cli":
-		fmt.Println("Work In Progress please come back soon")
+		cli.Run()
 	case "mock":
 		mock.Run()
 	default:

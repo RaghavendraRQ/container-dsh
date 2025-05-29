@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -38,7 +38,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				delete(m.selected, m.cursor)
 			} else {
-				m.selected[m.cursor] = struct{}{}
+				m.selected[m.cursor] = struct{}{} // TODO: Show the Output of the selected option
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func (m Model) View() string {
 	return s
 }
 
-func main() {
+func Run() {
 	fmt.Println("CLI VERSION")
 	p := tea.NewProgram(initialModel())
 
