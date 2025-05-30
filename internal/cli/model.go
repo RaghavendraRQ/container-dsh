@@ -65,3 +65,33 @@ func (m Model) View() string {
 
 	return s
 }
+
+const (
+	ListView uint = iota
+	TitleView
+	BodyView
+)
+
+type testModel struct {
+	state uint
+	//store Store
+}
+
+func NewTestModel() testModel {
+	return testModel{
+		state: ListView,
+	}
+}
+
+func (t testModel) Init() tea.Cmd {
+	return nil
+}
+
+func (t testModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return t, nil
+}
+
+func (t testModel) View() string {
+	s := "Hello"
+	return s
+}
