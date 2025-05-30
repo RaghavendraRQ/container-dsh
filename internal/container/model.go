@@ -43,7 +43,7 @@ type Container struct {
 	Status Status `json:"status"`
 }
 
-type ContainerSData struct {
+type ContainersData struct {
 	Containers []Container `json:"containers"`
 	Total      int         `json:"total"`
 }
