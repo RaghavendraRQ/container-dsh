@@ -3,6 +3,7 @@ package main
 import (
 	"container-dsh/cmd/cli"
 	"container-dsh/cmd/mock"
+	"container-dsh/cmd/prom"
 	"container-dsh/cmd/server"
 	"flag"
 	"fmt"
@@ -18,7 +19,7 @@ func main() {
 	mode := flag.String("mode", "server", modeUsage)
 
 	flag.Usage = func() {
-		fmt.Printf("Usage: %s [--mode=server|cli|mock|logger]\n", os.Args[0])
+		fmt.Printf("Usage: %s [--mode=server|cli|mock|logger|prometheus]\n", os.Args[0])
 		fmt.Println("Description:\n Starts different components of the container dashboard.")
 		flag.PrintDefaults()
 	}
@@ -34,6 +35,8 @@ func main() {
 		cli.Run()
 	case "mock":
 		mock.Run()
+	case "prometheus":
+		prom.Run()
 	default:
 		fmt.Println(modeError)
 		os.Exit(1)
