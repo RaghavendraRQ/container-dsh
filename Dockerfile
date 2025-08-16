@@ -11,5 +11,6 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o container-dsh ./cmd/container-dsh
 
 EXPOSE 8080
+EXPOSE 3000
 
 CMD ["./container-dsh"]
