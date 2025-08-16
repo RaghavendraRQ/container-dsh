@@ -3,7 +3,6 @@ package prom
 import (
 	"container-dsh/internal/container"
 	"log"
-	"math/rand"
 	"net/http"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 var (
 	testMetrics    = NewPrometheusMetrics()
 	cli            = container.GetClient()
-	scrapeInterval = 2 * time.Second
+	scrapeInterval = 2 * time.Second // TODO: make configurable
 )
 
 func collectMetrics(containerId string) error {
@@ -22,9 +21,9 @@ func collectMetrics(containerId string) error {
 	if err != nil {
 		return err
 	}
-	// container_stats{container_id, container_name} value
+	// container-dsh_METRICFAMILY{container_id, container_name} value
 	testMetrics.CpuUsage.WithLabelValues(containerId, containerStats.Name).Set(containerStats.CpuUsage)
-	testMetrics.MemUsage.WithLabelValues(containerId, containerStats.Name).Set(rand.Float64())
+	testMetrics.MemUsage.WithLabelValues(containerId, containerStats.Name).Set(containerStats.MemUsage)
 	testMetrics.DiskIO.WithLabelValues(containerId, containerStats.Name).Set(containerStats.DiskIO)
 	testMetrics.NetIO.WithLabelValues(containerId, containerStats.Name).Set(containerStats.NetIO)
 
