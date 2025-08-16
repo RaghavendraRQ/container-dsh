@@ -13,7 +13,7 @@ export PORT=":8080"
 export CLIENT_URL="http://localhost:3000" # Change this later...
 
 if [ "$1" == "prometheus" ]; then 
-    prometheus --config.file=prometheus.yml >&2
+    prometheus --config.file=prometheus.yml >&2 &
 fi
 go run ./cmd/container-dsh --mode="$1"
 jq . time.json > time2.json

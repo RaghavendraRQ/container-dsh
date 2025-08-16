@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	testMetrics = NewPrometheusMetrics()
-	cli         = container.GetClient()
+	testMetrics    = NewPrometheusMetrics()
+	cli            = container.GetClient()
+	scrapeInterval = 2 * time.Second
 )
 
 func collectMetrics(containerId string) error {
@@ -35,13 +36,20 @@ func Run() error {
 
 	// Test for one sample container ID
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		ticker := time.NewTicker(scrapeInterval)
 		defer ticker.Stop()
-		containerId := "3cd562e2b938"
+
+		containerIds, err := container.GetContainerList(cli)
+		if err != nil {
+			log.Printf("Error getting container list: %v", err)
+			return
+		}
 
 		for range ticker.C {
-			if err := collectMetrics(containerId); err != nil {
-				log.Printf("Error collecting metrics for container %s: %v", containerId, err)
+			for _, containerId := range containerIds {
+				if err := collectMetrics(containerId); err != nil {
+					log.Printf("Error collecting metrics for container %s: %v", containerId, err)
+				}
 			}
 		}
 	}()
