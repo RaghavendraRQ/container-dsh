@@ -2,50 +2,39 @@ package prom
 
 import (
 	"container-dsh/internal/container"
-	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
-	cpu_usage = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "cpu_usage",
-			Help: "Shows cpu usage of the container",
-		},
-	)
+	testMetrics = NewPrometheusMetrics()
+	cli         = container.GetClient()
 )
 
-func changeCpu() {
-	cli := container.GetClient()
-	containers, err := container.GetContainerList(cli)
+func collectMetrics(containerId string) error {
+	containerStats, err := container.GetContainerData(cli, containerId)
 	if err != nil {
-		panic(err) // TODO: Want to propagate the error
+		return err
 	}
-	targetContainer := containers[0] // For now, just take the first container
+	// container_stats{container_id, container_name} value
+	testMetrics.CpuUsage.WithLabelValues(containerId, containerStats.Name).Set(containerStats.CpuUsage)
+	testMetrics.MemUsage.WithLabelValues(containerId, containerStats.Name).Set(containerStats.MemUsage)
+	testMetrics.DiskIO.WithLabelValues(containerId, containerStats.Name).Set(containerStats.DiskIO)
+	testMetrics.NetIO.WithLabelValues(containerId, containerStats.Name).Set(containerStats.NetIO)
 
-	for {
-
-		targetContainerData, err := container.GetContainerData(cli, targetContainer)
-		if err != nil {
-			panic(err)
-		}
-		cpu_usage.Set(targetContainerData.CpuUsage)
-		//fmt.Printf("CPU Usage for container %s: %f\n", targetContainer, targetContainerData.CpuUsage)
-		time.Sleep(1 * time.Second)
-	}
-
+	return nil
 }
 
-func Run() {
-	prometheus.MustRegister(cpu_usage)
-	http.Handle("/metrics", promhttp.Handler())
-	go changeCpu()
-	fmt.Println("Checking prometheus.(Server is running in the background)")
-	log.Fatal(http.ListenAndServe(":3000", nil))
+func Run() error {
+	prometheus.MustRegister(testMetrics.CpuUsage, testMetrics.DiskIO, testMetrics.NetIO, testMetrics.MemUsage)
 
+	// Test for one sample container ID
+	go collectMetrics("")
+
+	http.Handle("/metrics", promhttp.Handler())
+	log.Println("Server is running on port 8080")
+	return http.ListenAndServe(":8080", nil)
 }
