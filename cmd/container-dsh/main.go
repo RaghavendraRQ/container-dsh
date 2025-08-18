@@ -5,6 +5,7 @@ import (
 	"container-dsh/cmd/mock"
 	"container-dsh/cmd/prom"
 	"container-dsh/cmd/server"
+	"container-dsh/internal/container"
 	"flag"
 	"fmt"
 	"os"
@@ -37,8 +38,22 @@ func main() {
 		mock.Run()
 	case "prometheus":
 		prom.Run()
+
+	case "redis":
+		TestCache()
 	default:
 		fmt.Println(modeError)
 		os.Exit(1)
+	}
+}
+func TestCache() {
+	cli := container.GetClient()
+	for i := range 10 {
+		containerIds, err := container.GetContainerList(cli)
+		if err != nil {
+			fmt.Println("Error", err)
+		}
+		fmt.Printf("ContainerIds(%d): %v", i, containerIds)
+
 	}
 }

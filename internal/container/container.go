@@ -5,11 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"sync"
+	"time"
+
+	"container-dsh/internal/config"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
@@ -20,7 +25,19 @@ var (
 			return &container.StatsResponse{}
 		},
 	}
+	rdb *redis.Client
 )
+
+func init() {
+	rdbConfig, err := config.NewRedisConfig()
+	if err != nil {
+		slog.Warn("Redis is not connected")
+	}
+	rdb = redis.NewClient(&redis.Options{
+		Addr:     rdbConfig.Addr,
+		Password: rdbConfig.Password,
+	})
+}
 
 func GetClient() *client.Client {
 	if cli != nil {
@@ -35,15 +52,31 @@ func GetClient() *client.Client {
 }
 
 func GetContainerList(cli *client.Client) ([]string, error) {
+
+	if rdb != nil {
+		containerIds, err := rdb.LRange(ctx, "container-list", 0, -1).Result()
+		if err == nil {
+			slog.Info("Cache Hit")
+			return containerIds, nil
+		}
+		slog.Warn("Cache Fail")
+	}
 	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
 		return nil, fmt.Errorf("error in getting containers: %v", err)
 	}
+
 	var containerIds []string
 	for _, cont := range containers {
 		containerIds = append(containerIds, cont.ID)
 	}
+
+	// Add redis as cache for storing containerIds
+	if rdb != nil {
+		rdb.RPush(ctx, "container-list", containerIds, 3*time.Hour)
+	}
 	return containerIds, nil
+
 }
 
 func GetContainerData(cli *client.Client, containerId string) (Container, error) {
