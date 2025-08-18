@@ -2,6 +2,7 @@ package prom
 
 import (
 	"container-dsh/internal/container"
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -30,24 +31,29 @@ func collectMetrics(containerId string) error {
 	return nil
 }
 
-func Run() error {
+func Run(ctx context.Context) error {
 	prometheus.MustRegister(testMetrics.CpuUsage, testMetrics.DiskIO, testMetrics.NetIO, testMetrics.MemUsage)
 
 	go func() {
 		ticker := time.NewTicker(scrapeInterval)
 		defer ticker.Stop()
 
-		containerIds, err := container.GetContainerList(cli)
-		if err != nil {
-			log.Printf("Error getting container list: %v", err)
-			return
-		}
-
-		for range ticker.C {
-			for _, containerId := range containerIds {
-				if err := collectMetrics(containerId); err != nil {
-					log.Printf("Error collecting metrics for container %s: %v", containerId, err)
+		for {
+			select {
+			case <-ticker.C:
+				containerIds, err := container.GetContainerList(cli)
+				if err != nil {
+					log.Printf("Error getting container list: %v", err)
+					return
 				}
+				for _, containerId := range containerIds {
+					if err := collectMetrics(containerId); err != nil {
+						log.Printf("Error collecting metrics for container %s: %v", containerId, err)
+					}
+				}
+			case <-ctx.Done():
+				log.Println("Stooping Metrics Scraping ")
+				return
 			}
 		}
 	}()
