@@ -33,7 +33,6 @@ func collectMetrics(containerId string) error {
 func Run() error {
 	prometheus.MustRegister(testMetrics.CpuUsage, testMetrics.DiskIO, testMetrics.NetIO, testMetrics.MemUsage)
 
-	// Test for one sample container ID
 	go func() {
 		ticker := time.NewTicker(scrapeInterval)
 		defer ticker.Stop()
