@@ -27,12 +27,7 @@ var (
 			return &container.StatsResponse{}
 		},
 	}
-	rdb *cache.Cache
 )
-
-func init() {
-	rdb = cache.NewCache("container-ids") // TODO: Configure it outside
-}
 
 func GetClient() *client.Client {
 	if cli != nil {
@@ -47,9 +42,12 @@ func GetClient() *client.Client {
 }
 
 func GetContainerList(cli *client.Client) ([]string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
+	rdb, err := cache.NewCache("container-ids") // TODO: Configure it outside
+	if err != nil {
+		fmt.Println("Can't Create redis instace", err)
+	}
 	containerIds, err := rdb.GetContainerList(ctx)
 	if err != nil {
 		containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})

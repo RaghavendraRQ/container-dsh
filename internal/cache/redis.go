@@ -39,20 +39,20 @@ type Cache struct {
 	containerKey string
 }
 
-func NewCache(containerKey string) *Cache {
-	redisClient, err := NewRedisConfig()
+func NewCache(containerKey string) (*Cache, error) {
+	cfg, err := NewRedisConfig()
 	if err != nil {
-		panic("Can't Create Redis client")
+		return nil, fmt.Errorf("failed to read redis config: %w", err)
 	}
-	rdbQ := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: redisClient.Password,
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.Addr,
+		Password: cfg.Password,
 		DB:       0,
 	})
-	return &Cache{
-		rdb:          rdbQ,
-		containerKey: containerKey,
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		return nil, fmt.Errorf("redis connection failed: %w", err)
 	}
+	return &Cache{rdb: rdb, containerKey: containerKey}, nil
 }
 
 func (c *Cache) GetContainerList(ctx context.Context) ([]string, error) {
@@ -60,8 +60,10 @@ func (c *Cache) GetContainerList(ctx context.Context) ([]string, error) {
 		return nil, fmt.Errorf("can't ping to redis in getting")
 	}
 	values, err := c.rdb.LRange(ctx, c.containerKey, 0, -1).Result()
-	if err != nil || len(values) <= 0 {
+	if err == redis.Nil || len(values) == 0 {
 		return nil, fmt.Errorf("can't get the containerids")
+	} else if err != nil {
+		return nil, fmt.Errorf("network issue or redis down")
 	}
 	return values, nil
 }
@@ -79,7 +81,10 @@ func (c *Cache) SetContainerList(ctx context.Context, data []string, ttl time.Du
 	}
 	// For Setting TTL on list Used Pipe
 	pipe := c.rdb.Pipeline()
-	pipe.RPush(ctx, c.containerKey, data)
+	pipe.Del(ctx, c.containerKey)
+	for _, data := range data {
+		pipe.RPush(ctx, c.containerKey, data)
+	}
 	pipe.Expire(ctx, c.containerKey, ttl)
 	_, err := pipe.Exec(ctx)
 
