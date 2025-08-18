@@ -1,19 +1,22 @@
 package container
 
 import (
+	"container-dsh/internal/cache"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"log/slog"
 	"sync"
 	"time"
 
-	"container-dsh/internal/config"
-
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
-	"github.com/redis/go-redis/v9"
+)
+
+const (
+	TTL = 5 * time.Minute
 )
 
 var (
@@ -24,18 +27,11 @@ var (
 			return &container.StatsResponse{}
 		},
 	}
-	rdb *redis.Client
+	rdb *cache.Cache
 )
 
 func init() {
-	rdbConfig, err := config.NewRedisConfig()
-	if err != nil {
-		slog.Warn("Redis is not connected")
-	}
-	rdb = redis.NewClient(&redis.Options{
-		Addr:     rdbConfig.Addr,
-		Password: rdbConfig.Password,
-	})
+	rdb = cache.NewCache("container-ids") // TODO: Configure it outside
 }
 
 func GetClient() *client.Client {
@@ -51,29 +47,27 @@ func GetClient() *client.Client {
 }
 
 func GetContainerList(cli *client.Client) ([]string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
-	if rdb != nil {
-		containerIds, err := rdb.LRange(ctx, "container-list", 0, -1).Result()
-		if err == nil {
-			slog.Info("Cache Hit")
-			return containerIds, nil
-		}
-		slog.Warn("Cache Fail")
-	}
-	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
+	containerIds, err := rdb.GetContainerList(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("error in getting containers: %v", err)
-	}
+		containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
+		if err != nil {
+			return nil, fmt.Errorf("error in getting containers: %v", err)
+		}
 
-	var containerIds []string
-	for _, cont := range containers {
-		containerIds = append(containerIds, cont.ID)
-	}
+		var containerIds []string
+		for _, cont := range containers {
+			containerIds = append(containerIds, cont.ID)
+		}
+		if err := rdb.SetContainerList(ctx, containerIds, TTL); err != nil {
+			log.Print(err)
+		}
+		return containerIds, nil
 
-	// Add redis as cache for storing containerIds
-	if rdb != nil {
-		rdb.RPush(ctx, "container-list", containerIds, 3*time.Hour)
 	}
+	log.Println("Cache Hit")
 	return containerIds, nil
 
 }

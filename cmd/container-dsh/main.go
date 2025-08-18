@@ -53,7 +53,7 @@ func TestCache() {
 		if err != nil {
 			fmt.Println("Error", err)
 		}
-		fmt.Printf("ContainerIds(%d): %v", i, containerIds)
+		fmt.Printf("ContainerIds(%d): %v\n", i, containerIds)
 
 	}
 }
