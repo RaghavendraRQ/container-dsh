@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"log/slog"
 	"sync"
 	"time"
@@ -153,7 +152,7 @@ func RunConainer(cli *client.Client, image string) {
 	if err != nil {
 		fmt.Println("Can't able to start image")
 	}
-	log.Println("Started: ", image)
+	slog.Info("Started: ", "", image)
 
 }
 

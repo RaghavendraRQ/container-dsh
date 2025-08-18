@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -57,9 +57,9 @@ func Start(haveTimeLogger bool) error {
 		go startTimeLogger(&wg)
 	}
 	GetContainerData(cli, containers)
-	log.Printf("Before wait")
+	slog.Info("Before wait")
 	wg.Wait()
-	log.Printf("After wait")
+	slog.Info("After wait")
 	return nil
 }
 

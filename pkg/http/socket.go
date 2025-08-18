@@ -2,7 +2,7 @@ package http
 
 import (
 	"container-dsh/internal/container"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -46,7 +46,7 @@ func handleMetrics(conn *websocket.Conn, cli *client.Client) {
 	for range ticker.C {
 		containerIds, _ := container.GetContainerList(cli)
 		if err := conn.WriteJSON(containerIds); err != nil {
-			log.Println("Error writing message:", err)
+			slog.Error("Error writing message", "error", err)
 			break
 		}
 	}
@@ -59,22 +59,22 @@ func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket connection closed: %v", err)
+				slog.Info("WebSocket connection closed", "error", err)
 				return
 			}
-			log.Println("Error reading message:", err)
+			slog.Info("Error reading message", "error", err)
 			return
 		}
-		log.Printf("Received message: %s\n", message)
+		slog.Info("Received message: %s\n", "", message)
 
 		if messageType == websocket.CloseMessage {
-			log.Printf("WebSocket close message received: %s\n", message)
+			slog.Info("WebSocket close message received: %s\n", "", message)
 			return
 		}
 
 		metrics, err := container.GetContainerData(cli, string(message))
 		if err != nil {
-			log.Println("Error getting container data:", err)
+			slog.Info("Error getting container data:", "", err)
 			conn.WriteMessage(websocket.TextMessage, []byte("No data"))
 			continue
 		}
@@ -83,10 +83,10 @@ func handleSingleContainer(conn *websocket.Conn, cli *client.Client) {
 		defer ticker.Stop()
 		for range ticker.C {
 			if err := conn.WriteJSON(metrics); err != nil {
-				log.Println("Error writing message:", err)
+				slog.Info("Error writing message:", "", err)
 				return
 			}
-			log.Printf("Container data: %s\n", metrics.String())
+			slog.Info("Container data: %s\n", "", metrics.String())
 		}
 	}
 }

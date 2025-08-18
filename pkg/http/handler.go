@@ -3,7 +3,7 @@ package http
 import (
 	"container-dsh/internal/container"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,7 +11,7 @@ import (
 
 func loggerMiddleWare(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Received request:", r.Method, r.URL.Path)
+		slog.Info("Received request:", r.Method, r.URL.Path)
 		next.ServeHTTP(w, r)
 	})
 }
