@@ -1,0 +1,5 @@
+edition = "2023";
+
+package container_dsh;
+
+option go_package = "";
