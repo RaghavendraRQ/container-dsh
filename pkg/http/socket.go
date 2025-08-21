@@ -1,10 +1,11 @@
 package http
 
 import (
-	"container-dsh/internal/container"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/container"
 
 	"github.com/docker/docker/client"
 	"github.com/gorilla/websocket"

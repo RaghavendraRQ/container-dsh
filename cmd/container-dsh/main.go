@@ -1,14 +1,15 @@
 package main
 
 import (
-	"container-dsh/cmd/cli"
-	"container-dsh/cmd/mock"
-	"container-dsh/cmd/prom"
-	"container-dsh/cmd/server"
-	"container-dsh/internal/container"
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/raghavendrarq/container-dsh/cmd/cli"
+	"github.com/raghavendrarq/container-dsh/cmd/mock"
+	"github.com/raghavendrarq/container-dsh/cmd/prom"
+	"github.com/raghavendrarq/container-dsh/cmd/server"
+	"github.com/raghavendrarq/container-dsh/internal/container"
 )
 
 const (

@@ -1,4 +1,4 @@
-module container-dsh
+module github.com/raghavendrarq/container-dsh
 
 go 1.24.0
 

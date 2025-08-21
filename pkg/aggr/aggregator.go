@@ -1,12 +1,13 @@
 package aggr
 
 import (
-	"container-dsh/internal/container"
 	"encoding/json"
 	"fmt"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/container"
 )
 
 type MetricAggregate struct {

@@ -1,10 +1,11 @@
 package http
 
 import (
-	"container-dsh/internal/config"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/raghavendrarq/container-dsh/internal/config"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"

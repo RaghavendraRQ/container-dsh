@@ -1,7 +1,6 @@
 package container
 
 import (
-	"container-dsh/internal/cache"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,6 +8,8 @@ import (
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/cache"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"

@@ -1,9 +1,10 @@
 package cli
 
 import (
-	"container-dsh/internal/cli"
 	"fmt"
 	"os"
+
+	"github.com/raghavendrarq/container-dsh/internal/cli"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

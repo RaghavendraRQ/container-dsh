@@ -1,9 +1,10 @@
 package prom
 
 import (
-	"container-dsh/pkg/prom"
 	"context"
 	"log"
+
+	"github.com/raghavendrarq/container-dsh/pkg/prom"
 )
 
 func Run() {

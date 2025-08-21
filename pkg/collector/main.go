@@ -1,13 +1,14 @@
 package collector
 
 import (
-	"container-dsh/pkg/logger"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/pkg/logger"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"

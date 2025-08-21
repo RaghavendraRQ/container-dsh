@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	@echo "Building container-dsh"
+	@echo "Building github.com/raghavendrarq/container-dsh"
 	@GOOS=linux CGOENABLED=false go build ./cmd/container-dsh --mode="$(MODE)"
 
 .PHONY: run

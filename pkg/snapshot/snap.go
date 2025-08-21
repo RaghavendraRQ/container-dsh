@@ -1,10 +1,11 @@
 package snapshot
 
 import (
-	"container-dsh/internal/container"
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/container"
 
 	"github.com/docker/docker/client"
 )

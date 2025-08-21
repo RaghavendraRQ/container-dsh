@@ -1,6 +1,6 @@
 package cli
 
-import "container-dsh/internal/container"
+import "github.com/raghavendrarq/container-dsh/internal/container"
 
 type Container struct {
 	Id    uint

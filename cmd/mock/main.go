@@ -1,12 +1,13 @@
 package mock
 
 import (
-	"container-dsh/internal/container"
-	"container-dsh/pkg/aggr"
-	"container-dsh/pkg/logger"
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/container"
+	"github.com/raghavendrarq/container-dsh/pkg/aggr"
+	"github.com/raghavendrarq/container-dsh/pkg/logger"
 )
 
 var (

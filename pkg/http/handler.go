@@ -1,10 +1,11 @@
 package http
 
 import (
-	"container-dsh/internal/container"
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/raghavendrarq/container-dsh/internal/container"
 
 	"github.com/gorilla/mux"
 )

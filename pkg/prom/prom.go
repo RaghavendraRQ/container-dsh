@@ -1,11 +1,12 @@
 package prom
 
 import (
-	"container-dsh/internal/container"
 	"context"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/container"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
