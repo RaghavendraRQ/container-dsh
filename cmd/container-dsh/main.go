@@ -7,9 +7,9 @@ import (
 
 	"github.com/raghavendrarq/container-dsh/cmd/cli"
 	"github.com/raghavendrarq/container-dsh/cmd/mock"
+	"github.com/raghavendrarq/container-dsh/cmd/pb"
 	"github.com/raghavendrarq/container-dsh/cmd/prom"
 	"github.com/raghavendrarq/container-dsh/cmd/server"
-	"github.com/raghavendrarq/container-dsh/internal/container"
 )
 
 const (
@@ -39,22 +39,10 @@ func main() {
 		mock.Run()
 	case "prometheus":
 		prom.Run()
-
-	case "redis":
-		TestCache()
+	case "pb":
+		pb.Run()
 	default:
 		fmt.Println(modeError)
 		os.Exit(1)
-	}
-}
-func TestCache() {
-	cli := container.GetClient()
-	for i := range 10 {
-		containerIds, err := container.GetContainerList(cli)
-		if err != nil {
-			fmt.Println("Error", err)
-		}
-		fmt.Printf("ContainerIds(%d): %v\n", i, containerIds)
-
 	}
 }

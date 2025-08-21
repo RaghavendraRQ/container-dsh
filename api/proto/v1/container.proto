@@ -2,4 +2,25 @@ edition = "2023";
 
 package container_dsh;
 
-option go_package = "";
+option go_package = "github.com/raghavendrarq/container-dsh/api/gen/go/v1;v1";
+
+
+message ContainerStat {
+    double cpu_usage = 1;
+    double mem_usage = 2;
+    double netio = 3;
+    double diskio = 4;
+}
+
+message ContainerStatRequest {
+    string id = 1;
+}
+
+message ContainerStatRespose {
+    string id = 1;
+    ContainerStat stats = 2;
+}
+
+service ContainerService {
+    rpc GetContainerStats(ContainerStatRequest) returns (ContainerStatRespose);
+}

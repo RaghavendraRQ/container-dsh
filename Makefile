@@ -7,7 +7,7 @@ build:
 run:
 	@echo "Running Container-dsh"
 	@echo "$(EXTRA)"
-	@go run ./cmd/container-dsh/ 
+	@go run ./cmd/container-dsh/ --mode="$(MODE)"
 
 .PHONY: monitor
 monitor:
@@ -20,5 +20,5 @@ proto:
 	@protoc \
 	--proto_path=api/proto/ \
 	--go_opt=module=github.com/raghavendrarq/container-dsh \
-	--go_out=gen/go/v1
+	--go_out=. \
 	api/proto/v1/*.proto
