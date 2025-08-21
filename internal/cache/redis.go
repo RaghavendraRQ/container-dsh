@@ -79,15 +79,15 @@ func (c *Cache) SetContainerList(ctx context.Context, data []string, ttl time.Du
 	if err := c.rdb.Ping(ctx).Err(); err != nil {
 		return fmt.Errorf("can't ping to redis")
 	}
-	// For Setting TTL on list Used Pipe
+	// Batching all the commands and sending them
 	pipe := c.rdb.Pipeline()
 	pipe.Del(ctx, c.containerKey)
 	for _, data := range data {
 		pipe.RPush(ctx, c.containerKey, data)
 	}
 	pipe.Expire(ctx, c.containerKey, ttl)
-	_, err := pipe.Exec(ctx)
 
+	_, err := pipe.Exec(ctx)
 	if err != nil {
 		return fmt.Errorf("can't get the containerids")
 	}

@@ -31,8 +31,11 @@ func collectMetrics(containerId string) error {
 	return nil
 }
 
-func Run(ctx context.Context) error {
+func init() {
 	prometheus.MustRegister(testMetrics.CpuUsage, testMetrics.DiskIO, testMetrics.NetIO, testMetrics.MemUsage)
+}
+
+func Run(ctx context.Context) error {
 
 	go func() {
 		ticker := time.NewTicker(scrapeInterval)
