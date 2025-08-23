@@ -1,6 +1,6 @@
-# Container-DSH (Docker Statistics Hub)
+# Container-DSH
 
-A comprehensive Docker container monitoring dashboard that provides real-time container statistics through multiple interfaces including HTTP API, CLI, and Prometheus metrics.
+A comprehensive Docker container monitoring dashboard that provides real-time container statistics through multiple interfaces, including HTTP API, CLI, GRPC, and Prometheus metrics.
 
 ## 🚀 Features
 
@@ -24,8 +24,6 @@ A comprehensive Docker container monitoring dashboard that provides real-time co
 - [Configuration](#configuration)
 - [API Reference](#api-reference)
 - [Development](#development)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## 🛠 Installation
 
@@ -46,7 +44,7 @@ cd container-dsh
 # Build the application
 go build -o bin/container-dsh ./cmd/container-dsh
 
-# Or use the Makefile (note: contains some build issues, manual build recommended)
+# Or use the Makefile
 make help
 ```
 
@@ -365,13 +363,6 @@ make proto
 docker build -t container-dsh .
 ```
 
-### Code Style
-
-- Follow standard Go conventions
-- Use `gofmt` for formatting
-- Add comments for exported functions and types
-- Keep functions small and focused
-
 ## 🚨 Troubleshooting
 
 ### Common Issues
@@ -392,27 +383,6 @@ docker build -t container-dsh .
 - User doesn't have Docker permissions
 - Solution: Add user to docker group or run with sudo
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Add tests if applicable
-5. Run the linter and tests
-6. Commit your changes: `git commit -am 'Add some feature'`
-7. Push to the branch: `git push origin feature-name`
-8. Submit a pull request
-
-### Guidelines
-
-- Write clear, descriptive commit messages
-- Keep pull requests focused on a single feature or fix
-- Add documentation for new features
-- Ensure all tests pass before submitting
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
