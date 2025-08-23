@@ -89,6 +89,66 @@ func (x *ContainerStat) GetDiskio() float64 {
 	return 0
 }
 
+type Container struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            *string                `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Name          *string                `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Stats         *ContainerStat         `protobuf:"bytes,3,opt,name=stats" json:"stats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Container) Reset() {
+	*x = Container{}
+	mi := &file_v1_container_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Container) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Container) ProtoMessage() {}
+
+func (x *Container) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_container_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Container.ProtoReflect.Descriptor instead.
+func (*Container) Descriptor() ([]byte, []int) {
+	return file_v1_container_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Container) GetId() string {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return ""
+}
+
+func (x *Container) GetName() string {
+	if x != nil && x.Name != nil {
+		return *x.Name
+	}
+	return ""
+}
+
+func (x *Container) GetStats() *ContainerStat {
+	if x != nil {
+		return x.Stats
+	}
+	return nil
+}
+
 type ContainerStatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            *string                `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
@@ -98,7 +158,7 @@ type ContainerStatRequest struct {
 
 func (x *ContainerStatRequest) Reset() {
 	*x = ContainerStatRequest{}
-	mi := &file_v1_container_proto_msgTypes[1]
+	mi := &file_v1_container_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -110,7 +170,7 @@ func (x *ContainerStatRequest) String() string {
 func (*ContainerStatRequest) ProtoMessage() {}
 
 func (x *ContainerStatRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_container_proto_msgTypes[1]
+	mi := &file_v1_container_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -123,7 +183,7 @@ func (x *ContainerStatRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContainerStatRequest.ProtoReflect.Descriptor instead.
 func (*ContainerStatRequest) Descriptor() ([]byte, []int) {
-	return file_v1_container_proto_rawDescGZIP(), []int{1}
+	return file_v1_container_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ContainerStatRequest) GetId() string {
@@ -131,58 +191,6 @@ func (x *ContainerStatRequest) GetId() string {
 		return *x.Id
 	}
 	return ""
-}
-
-type ContainerStatRespose struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *string                `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Stats         *ContainerStat         `protobuf:"bytes,2,opt,name=stats" json:"stats,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ContainerStatRespose) Reset() {
-	*x = ContainerStatRespose{}
-	mi := &file_v1_container_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ContainerStatRespose) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ContainerStatRespose) ProtoMessage() {}
-
-func (x *ContainerStatRespose) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_container_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ContainerStatRespose.ProtoReflect.Descriptor instead.
-func (*ContainerStatRespose) Descriptor() ([]byte, []int) {
-	return file_v1_container_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ContainerStatRespose) GetId() string {
-	if x != nil && x.Id != nil {
-		return *x.Id
-	}
-	return ""
-}
-
-func (x *ContainerStatRespose) GetStats() *ContainerStat {
-	if x != nil {
-		return x.Stats
-	}
-	return nil
 }
 
 var File_v1_container_proto protoreflect.FileDescriptor
@@ -194,14 +202,15 @@ const file_v1_container_proto_rawDesc = "" +
 	"\tcpu_usage\x18\x01 \x01(\x01R\bcpuUsage\x12\x1b\n" +
 	"\tmem_usage\x18\x02 \x01(\x01R\bmemUsage\x12\x14\n" +
 	"\x05netio\x18\x03 \x01(\x01R\x05netio\x12\x16\n" +
-	"\x06diskio\x18\x04 \x01(\x01R\x06diskio\"&\n" +
+	"\x06diskio\x18\x04 \x01(\x01R\x06diskio\"c\n" +
+	"\tContainer\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x122\n" +
+	"\x05stats\x18\x03 \x01(\v2\x1c.container_dsh.ContainerStatR\x05stats\"&\n" +
 	"\x14ContainerStatRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"Z\n" +
-	"\x14ContainerStatRespose\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x122\n" +
-	"\x05stats\x18\x02 \x01(\v2\x1c.container_dsh.ContainerStatR\x05stats2q\n" +
-	"\x10ContainerService\x12]\n" +
-	"\x11GetContainerStats\x12#.container_dsh.ContainerStatRequest\x1a#.container_dsh.ContainerStatResposeB9Z7github.com/raghavendrarq/container-dsh/api/gen/go/v1;v1b\beditionsp\xe8\a"
+	"\x02id\x18\x01 \x01(\tR\x02id2f\n" +
+	"\x10ContainerService\x12R\n" +
+	"\x11GetContainerStats\x12#.container_dsh.ContainerStatRequest\x1a\x18.container_dsh.ContainerB9Z7github.com/raghavendrarq/container-dsh/api/gen/go/v1;v1b\beditionsp\xe8\a"
 
 var (
 	file_v1_container_proto_rawDescOnce sync.Once
@@ -218,13 +227,13 @@ func file_v1_container_proto_rawDescGZIP() []byte {
 var file_v1_container_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_v1_container_proto_goTypes = []any{
 	(*ContainerStat)(nil),        // 0: container_dsh.ContainerStat
-	(*ContainerStatRequest)(nil), // 1: container_dsh.ContainerStatRequest
-	(*ContainerStatRespose)(nil), // 2: container_dsh.ContainerStatRespose
+	(*Container)(nil),            // 1: container_dsh.Container
+	(*ContainerStatRequest)(nil), // 2: container_dsh.ContainerStatRequest
 }
 var file_v1_container_proto_depIdxs = []int32{
-	0, // 0: container_dsh.ContainerStatRespose.stats:type_name -> container_dsh.ContainerStat
-	1, // 1: container_dsh.ContainerService.GetContainerStats:input_type -> container_dsh.ContainerStatRequest
-	2, // 2: container_dsh.ContainerService.GetContainerStats:output_type -> container_dsh.ContainerStatRespose
+	0, // 0: container_dsh.Container.stats:type_name -> container_dsh.ContainerStat
+	2, // 1: container_dsh.ContainerService.GetContainerStats:input_type -> container_dsh.ContainerStatRequest
+	1, // 2: container_dsh.ContainerService.GetContainerStats:output_type -> container_dsh.Container
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

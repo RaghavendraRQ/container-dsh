@@ -12,15 +12,17 @@ message ContainerStat {
     double diskio = 4;
 }
 
+message Container {
+    string id = 1;
+    string name = 2;
+    ContainerStat stats = 3;
+}
+
 message ContainerStatRequest {
     string id = 1;
 }
 
-message ContainerStatRespose {
-    string id = 1;
-    ContainerStat stats = 2;
-}
 
 service ContainerService {
-    rpc GetContainerStats(ContainerStatRequest) returns (ContainerStatRespose);
+    rpc GetContainerStats(ContainerStatRequest) returns (Container);
 }
