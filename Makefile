@@ -62,7 +62,9 @@ proto:
 	@$(PROTOC) \
 	--proto_path=$(PROTO_DIR) \
 	--go_opt=module=github.com/raghavendrarq/container-dsh \
+	--go-grpc_opt=module=github.com/raghavendrarq/container-dsh \
 	--go_out=. \
+	--go-grpc_out=. \
 	$(PROTO_DIR)/v1/*.proto
 	@echo "Done ...."
 
