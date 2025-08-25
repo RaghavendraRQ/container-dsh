@@ -58,7 +58,7 @@ docker build -t container-dsh .
 docker run -p 8080:8080 -p 3000:3000 container-dsh
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Start the HTTP Server
 
@@ -88,7 +88,7 @@ The server will start on port 8080 by default.
 
 Metrics will be available at `http://localhost:8080/metrics`
 
-## 📖 Usage
+## Usage
 
 ### Available Modes
 
@@ -182,7 +182,7 @@ make clean
 ./start.sh prometheus
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -219,7 +219,7 @@ scrape_configs:
       - targets: ["localhost:8080"]
 ```
 
-## 📚 API Reference
+## API Reference
 
 ### REST Endpoints
 
@@ -295,7 +295,7 @@ service ContainerService {
 - `6`: Exited
 - `7`: Dead
 
-## 🔧 Development
+## Development
 
 ### Prerequisites for Development
 
@@ -363,7 +363,7 @@ make proto
 docker build -t container-dsh .
 ```
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -384,14 +384,14 @@ docker build -t container-dsh .
 - Solution: Add user to docker group or run with sudo
 
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Bubble Tea](https://github.com/charmbracelet/bubbletea) - For the beautiful CLI interface
 - [Docker](https://www.docker.com/) - For containerization support
 - [Prometheus](https://prometheus.io/) - For metrics collection
 - [Go](https://golang.org/) - For the robust foundation
 
-## 📞 Support
+## Support
 
 If you encounter any problems or have questions, please:
 
