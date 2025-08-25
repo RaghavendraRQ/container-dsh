@@ -1,16 +1,33 @@
 package pb
 
 import (
-	"context"
+	"fmt"
+	"net"
 
 	v1 "github.com/raghavendrarq/container-dsh/api/gen/go/v1"
+	"google.golang.org/grpc"
 )
 
-type ContainerService struct {
-	v1.UnimplementedContainerServiceServer
-}
+const (
+	ADDR = ":5001"
+	HELP = `
+		Addr: :5001
+		ContainerServices:
+			GetContainerService
+	`
+)
 
-func (c *ContainerService) GetContainerStats(ctx context.Context, req *v1.ContainerStatRequest) (*v1.Container, error) {
-	return &v1.Container{}, nil
+func Run() error {
+	grpcServer := grpc.NewServer()
+	listner, err := net.Listen("tcp", ADDR)
+	if err != nil {
+		return fmt.Errorf("error in creating listner: %v", err)
+	}
+	v1.RegisterContainerServiceServer(grpcServer, &ContainerService{})
 
+	fmt.Println("GRPC Server is running on Addr: ", ADDR)
+	if err := grpcServer.Serve(listner); err != nil {
+		return fmt.Errorf("error in serving grpc: %v", err)
+	}
+	return nil
 }

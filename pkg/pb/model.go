@@ -13,6 +13,12 @@ type ContainerStat struct {
 	DiskIO   float64
 }
 
+type Container struct {
+	Stat ContainerStat
+	Name string
+	Id   string
+}
+
 func (c *ContainerStat) ToProto() *v1.ContainerStat {
 	return &v1.ContainerStat{
 		CpuUsage: proto.Float64(c.CpuUsage),
@@ -22,11 +28,27 @@ func (c *ContainerStat) ToProto() *v1.ContainerStat {
 	}
 }
 
+func (c *Container) ToProto() *v1.Container {
+	return &v1.Container{
+		Stats: c.Stat.ToProto(),
+		Name:  proto.String(c.Name),
+		Id:    proto.String(c.Id),
+	}
+}
+
 func NewContainerStats(cont container.Container) ContainerStat {
 	return ContainerStat{
 		CpuUsage: cont.CpuUsage,
 		MemUsage: cont.MemUsage,
 		NetIO:    cont.NetIO,
 		DiskIO:   cont.DiskIO,
+	}
+}
+
+func NewContainer(cont container.Container) Container {
+	return Container{
+		Stat: NewContainerStats(cont),
+		Name: cont.Name,
+		Id:   cont.ID,
 	}
 }
