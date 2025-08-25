@@ -10,6 +10,11 @@ PROTO_GO_OUT := api/gen/go/
 PROTO_DIR := api/proto/
 BIN := bin
 
+# Exports
+export PORT=:8080
+export CLIENT_URL=http://localhost:3000 # Change this later...
+
+
 # Utils
 .PHONY: help
 help:
@@ -51,8 +56,8 @@ build-go:
 .PHONY: run-go
 run-go:
 	@echo "Running Container-dsh"
-	@echo "$(EXTRA)"
-	@$(GO) run ./cmd/container-dsh/ --mode="$(MODE)"
+	@$(GO) run ./cmd/container-dsh/ --mode=$(MODE)
+
 
 # Proto Options
 
