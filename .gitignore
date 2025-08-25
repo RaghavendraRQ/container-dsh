@@ -1,4 +1,6 @@
 .env
 data
+api/gen/*
 bin/
 *.log
+dump.rdb
