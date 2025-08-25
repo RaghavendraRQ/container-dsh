@@ -2,7 +2,7 @@
 
 A comprehensive Docker container monitoring dashboard that provides real-time container statistics through multiple interfaces, including HTTP API, CLI, GRPC, and Prometheus metrics.
 
-## 🚀 Features
+## Features
 
 - **Real-time Container Monitoring**: Track CPU usage, memory usage, network I/O, and disk I/O
 - **Multiple Interface Options**:
@@ -16,7 +16,7 @@ A comprehensive Docker container monitoring dashboard that provides real-time co
 - **Docker Integration**: Direct Docker API integration for container management
 - **Development Tools**: Mock mode for testing and development
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
