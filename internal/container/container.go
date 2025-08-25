@@ -46,27 +46,35 @@ func GetContainerList(cli *client.Client) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	rdb, err := cache.NewCache("container-ids") // TODO: Configure it outside
-	if err != nil {
-		fmt.Println("Can't Create redis instace", err)
-	}
-	containerIds, err := rdb.GetContainerList(ctx)
-	if err != nil {
-		containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
-		if err != nil {
-			return nil, fmt.Errorf("error in getting containers: %v", err)
-		}
+	cacheAvailable := (err == nil && rdb != nil)
 
-		var containerIds []string
-		for _, cont := range containers {
-			containerIds = append(containerIds, cont.ID)
+	if !cacheAvailable {
+		log.Println("Fallback to API")
+	}
+
+	if cacheAvailable {
+		cachedIds, err := rdb.GetContainerList(ctx)
+		if err != nil {
+			log.Println("Cache Miss")
 		}
+		return cachedIds, nil
+	}
+
+	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
+	if err != nil {
+		return nil, fmt.Errorf("error in getting containers: %v", err)
+	}
+
+	var containerIds []string
+	for _, cont := range containers {
+		containerIds = append(containerIds, cont.ID)
+	}
+	if cacheAvailable {
 		if err := rdb.SetContainerList(ctx, containerIds, TTL); err != nil {
 			log.Print(err)
 		}
-		return containerIds, nil
-
 	}
-	log.Println("Cache Hit")
+
 	return containerIds, nil
 
 }
