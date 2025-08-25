@@ -44,7 +44,7 @@ func Run() error {
 
 func httpHandler(muxRouter *mux.Router) {
 	muxRouter.HandleFunc("/", HomeHandler).Methods(http.MethodGet)
-	muxRouter.HandleFunc("/metrics", GetMetric).Methods(http.MethodGet)
+	muxRouter.HandleFunc("/metrics", GetMetric).Methods(http.MethodGet) // TODO: Change the URL since prometheus searches for this scraping
 	muxRouter.HandleFunc("/metrics/{id}", GetMetricById).Methods(http.MethodGet)
 }
 

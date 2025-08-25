@@ -12,7 +12,10 @@ BIN := bin
 
 # Exports
 export PORT=:8080
-export CLIENT_URL=http://localhost:3000 # Change this later...
+export CLIENT_URL=http://localhost:3000 
+export PROM_URL=:5050
+export REDIS_ADDR=localhost:6379
+export REDIS_PASSWD=
 
 
 # Utils

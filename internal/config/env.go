@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -18,7 +17,7 @@ func NewConfig() (*Cfg, error) {
 
 	CLIENT_URL, ok := os.LookupEnv("CLIENT_URL")
 	if !ok {
-		return nil, fmt.Errorf("client url is unset")
+		CLIENT_URL = "http://localhost:3000"
 	}
 
 	return &Cfg{
