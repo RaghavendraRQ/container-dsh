@@ -13,12 +13,12 @@ import (
 
 func Run() error {
 	//TODO: I know it looks ugly, need to refactor this...
-	cfg, err := config.NewConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error in configuration: %v", err)
 	}
 	corsRules := cors.New(cors.Options{
-		AllowedOrigins:   []string{cfg.CLIENT_URL},
+		AllowedOrigins:   []string{cfg.Server.ClientUrl},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type"},
 		AllowCredentials: true,
@@ -37,8 +37,8 @@ func Run() error {
 	//CORS Handler
 	corsHandler := corsRules.Handler(muxRouter)
 
-	log.Println("Starting HTTP server on port", cfg.PORT)
-	return http.ListenAndServe(cfg.PORT, corsHandler)
+	log.Println("Starting HTTP server on port", cfg.Server.Port)
+	return http.ListenAndServe(cfg.Server.Port, corsHandler)
 
 }
 

@@ -3,36 +3,11 @@ package cache
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
+	"github.com/raghavendrarq/container-dsh/internal/config"
 	"github.com/redis/go-redis/v9"
 )
-
-type redisCfg struct {
-	Addr     string
-	Password string
-}
-
-func NewRedisConfig() (*redisCfg, error) {
-	rdb := &redisCfg{}
-	Addr, ok := os.LookupEnv("REDIS_ADDR")
-	if !ok {
-		rdb.Addr = "localhost:6379"
-	} else {
-		rdb.Addr = Addr
-	}
-
-	Password, ok := os.LookupEnv("REDIS_PASSWD")
-	if !ok {
-		rdb.Password = ""
-	} else {
-		rdb.Password = Password
-	}
-
-	return rdb, nil
-
-}
 
 type Cache struct {
 	rdb          *redis.Client
@@ -40,13 +15,13 @@ type Cache struct {
 }
 
 func NewCache(containerKey string) (*Cache, error) {
-	cfg, err := NewRedisConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read redis config: %w", err)
 	}
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Password,
+		Addr:     cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
 		DB:       0,
 	})
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
