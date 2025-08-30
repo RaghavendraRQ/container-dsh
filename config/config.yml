@@ -1,0 +1,11 @@
+server:
+  port: ":8080"
+  client_url: "http://localhost:3000"
+  log_level: "info"
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+
+prometheus:
+  addr: "locahost:9090"
