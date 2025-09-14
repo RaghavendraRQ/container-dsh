@@ -54,11 +54,13 @@ all:
 .PHONY: build-go
 build-go:
 	@echo "Building github.com/raghavendrarq/container-dsh"
+	@$(GO) mod tidy
 	@GOOS=linux CGOENABLED=false $(GO) build ./cmd/container-dsh --mode="$(MODE)"
 
 .PHONY: run-go
 run-go:
 	@echo "Running Container-dsh"
+	@$(GO) mod tidy
 	@$(GO) run ./cmd/container-dsh/ --mode=$(MODE)
 
 
