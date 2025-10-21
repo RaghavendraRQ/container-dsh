@@ -11,14 +11,15 @@ func _() {
 	_ = x[Created-1]
 	_ = x[Running-2]
 	_ = x[Paused-3]
-	_ = x[UnPaused-4]
-	_ = x[Stopped-5]
-	_ = x[Removed-6]
+	_ = x[Restarting-4]
+	_ = x[Removing-5]
+	_ = x[Exited-6]
+	_ = x[Dead-7]
 }
 
-const _Status_name = "CreatedRunningPausedUnPausedStoppedRemoved"
+const _Status_name = "CreatedRunningPausedRestartingRemovingExitedDead"
 
-var _Status_index = [...]uint8{0, 7, 14, 20, 28, 35, 42}
+var _Status_index = [...]uint8{0, 7, 14, 20, 30, 38, 44, 48}
 
 func (i Status) String() string {
 	i -= 1

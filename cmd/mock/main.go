@@ -1,34 +1,31 @@
-package main
+package mock
 
 import (
-	"container-dsh/internal/container"
-	"container-dsh/pkg/aggr"
-	"container-dsh/pkg/logger"
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/container"
+	"github.com/raghavendrarq/container-dsh/pkg/aggr"
+	"github.com/raghavendrarq/container-dsh/pkg/logger"
 )
 
 var (
-	timeLogger logger.TimeSeries
+	timeLogger *logger.TimeLogger
 	manager    *aggr.AggregatorManager
 	wg         = sync.WaitGroup{}
 )
 
-func main() {
+func Run() {
 	cli := container.GetClient()
 	containers, err := container.GetContainerList(cli)
 	if err != nil {
-		panic(err)
+		panic(err) // TODO: Want to propagate the error
 	}
-	timeLogger = logger.TimeSeries{
-		MetricsChannel: make(chan logger.MetricEntry),
-		Done:           make(chan bool),
-	}
-	manager = aggr.NewAggregatorManager(2, 4)
+	manager = aggr.NewAggregatorManager(2, 3)
 	go manager.Run()
-	go timeLogger.Start("time3.json")
-
+	timeLogger = logger.NewTimeLogger("time.json")
+	go timeLogger.Start()
 	for _, containerId := range containers {
 		//fmt.Println("Container ID: ", containerId)
 		wg.Add(1)
@@ -36,7 +33,7 @@ func main() {
 			defer wg.Done()
 			containerData, err := container.GetContainerData(cli, id)
 			if err != nil {
-				panic(err)
+				panic(err) // TODO: Want to propagate the error
 			}
 			sendMetricsToLogger(id, containerData)
 			manager.Input <- containerData
@@ -44,8 +41,8 @@ func main() {
 		}(containerId)
 	}
 	wg.Wait()
-	timeLogger.Done <- true
-	timeLogger.Wg.Wait()
+	timeLogger.QuitCh <- true
+	timeLogger.Wait()
 	time.Sleep(5 * time.Second)
 	manager.Stop()
 
@@ -54,26 +51,26 @@ func main() {
 }
 
 func sendMetricsToLogger(id string, metric container.Container) {
-	if timeLogger.MetricsChannel != nil {
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+	if timeLogger.InputCh != nil {
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "cpu_usage",
 			Value:       metric.CpuUsage,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "mem_usage",
 			Value:       metric.MemUsage,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "net_io",
 			Value:       metric.NetIO,
 		}
-		timeLogger.MetricsChannel <- logger.MetricEntry{
+		timeLogger.InputCh <- logger.MetricEntry{
 			TimeStamp:   time.Now(),
 			ContainerId: id,
 			Metric:      "disk_io",

@@ -5,14 +5,28 @@ import "fmt"
 //go:generate stringer -type=Status
 type Status uint
 
+// created", "running", "paused", "restarting", "removing", "exited", or "dead
+var (
+	statusMap = map[string]Status{
+		"created":    Created,
+		"running":    Running,
+		"paused":     Paused,
+		"restarting": Restarting,
+		"removing":   Removing,
+		"exited":     Exited,
+		"dead":       Dead,
+	}
+)
+
 const (
 	_ Status = iota
 	Created
 	Running
 	Paused
-	UnPaused
-	Stopped
-	Removed
+	Restarting
+	Removing
+	Exited
+	Dead
 )
 
 type Stats struct {
@@ -29,7 +43,7 @@ type Container struct {
 	Status Status `json:"status"`
 }
 
-type ContainerSData struct {
+type ContainersData struct {
 	Containers []Container `json:"containers"`
 	Total      int         `json:"total"`
 }

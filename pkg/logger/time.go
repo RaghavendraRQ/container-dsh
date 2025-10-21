@@ -15,29 +15,36 @@ type MetricEntry struct {
 	Value       float64   `json:"value"`
 }
 
-type TimeSeries struct {
-	mu             sync.Mutex
-	Wg             sync.WaitGroup
-	Buffer         []MetricEntry `json:"timeseries"`
-	filePath       string
-	Done           chan bool
-	MetricsChannel chan MetricEntry
+type TimeLogger struct {
+	sync.WaitGroup
+	mu       sync.Mutex
+	Buffer   []MetricEntry `json:"timeseries"`
+	filePath string
+	QuitCh   chan bool
+	InputCh  chan MetricEntry
 }
 
-func (t *TimeSeries) Start(filepath string) {
-	t.filePath = filepath
-	t.Wg.Add(1)
-	defer t.Wg.Done()
+func NewTimeLogger(filepath string) *TimeLogger {
+	return &TimeLogger{
+		filePath: filepath,
+		InputCh:  make(chan MetricEntry),
+		QuitCh:   make(chan bool),
+	}
+}
+
+func (t *TimeLogger) Start() {
+	t.Add(1)
+	defer t.Done()
 	for {
 		select {
-		case <-t.Done:
+		case <-t.QuitCh:
 			log.Print("Done Channel recieived...")
 			t.mu.Lock()
 			t.Dump()
 			t.mu.Unlock()
 			return
 
-		case metric, ok := <-t.MetricsChannel:
+		case metric, ok := <-t.InputCh:
 			if !ok {
 				t.Dump()
 				return
@@ -53,7 +60,7 @@ func (t *TimeSeries) Start(filepath string) {
 	}
 }
 
-func (t *TimeSeries) Dump() {
+func (t *TimeLogger) Dump() {
 	file, err := os.OpenFile(t.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println("Open file error:", err)

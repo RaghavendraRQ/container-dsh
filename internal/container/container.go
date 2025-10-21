@@ -5,11 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"sync"
+	"time"
+
+	"github.com/raghavendrarq/container-dsh/internal/cache"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
+)
+
+const (
+	TTL = 5 * time.Minute
 )
 
 var (
@@ -35,15 +43,40 @@ func GetClient() *client.Client {
 }
 
 func GetContainerList(cli *client.Client) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	rdb, err := cache.NewCache("container-ids") // TODO: Configure it outside
+	cacheAvailable := (err == nil && rdb != nil)
+
+	if !cacheAvailable {
+		log.Println("Fallback to API")
+	}
+
+	if cacheAvailable {
+		cachedIds, err := rdb.GetContainerList(ctx)
+		if err != nil {
+			log.Println("Cache Miss")
+		}
+		return cachedIds, nil
+	}
+
 	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
 		return nil, fmt.Errorf("error in getting containers: %v", err)
 	}
+
 	var containerIds []string
 	for _, cont := range containers {
 		containerIds = append(containerIds, cont.ID)
 	}
+	if cacheAvailable {
+		if err := rdb.SetContainerList(ctx, containerIds, TTL); err != nil {
+			log.Print(err)
+		}
+	}
+
 	return containerIds, nil
+
 }
 
 func GetContainerData(cli *client.Client, containerId string) (Container, error) {
@@ -60,7 +93,7 @@ func GetContainerData(cli *client.Client, containerId string) (Container, error)
 		Stats:  NewMetrics(statsData),
 		ID:     containerId,
 		Name:   statsData.Name,
-		Status: Running,
+		Status: GetStatusById(cli, containerId),
 	}, nil
 
 }
@@ -120,6 +153,18 @@ func RunConainer(cli *client.Client, image string) {
 	if err != nil {
 		fmt.Println("Can't able to start image")
 	}
-	log.Println("Started: ", image)
+	slog.Info("Started: ", "", image)
 
+}
+
+func GetStatusById(cli *client.Client, containerId string) Status {
+	containerJSON, err := cli.ContainerInspect(ctx, containerId)
+	if err != nil {
+		return Dead
+	}
+	status, ok := statusMap[containerJSON.State.Status]
+	if !ok {
+		return Dead
+	}
+	return status
 }
